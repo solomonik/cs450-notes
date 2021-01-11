@@ -1,0 +1,579 @@
+%%\documentclass[handout]{beamer}
+%\documentclass[aspectratio=169,13pt]{beamer}
+
+%\input{./preamble}
+
+\subtitle{Introduction to Scientific Computing}
+\date{}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Motivation and Course Overview}
+
+\begin{frame}[fragile]{Scientific Computing Applications and Context}
+
+\begin{itemize}
+
+\item {\bf Mathematical modelling for computational science}
+\algcond{
+Typical scientific computing problems are numerical solutions to PDEs
+\begin{itemize}
+\sitem Newtonian dynamics: simulating particle systems in time
+\sitem Fluid and air flow models for engineering
+\sitem PDE-constrained numerical optimization: finding optimal configurations (used in engineering of control systems)
+\sitem Quantum chemistry (electronic structure calculations): many-electron Schr\"odinger equation
+\end{itemize}
+}
+
+\item {\bf Linear algebra and computation}
+
+\algcond{
+\begin{itemize}
+\item Linear algebra and numerical optimization are building blocks for machine learning methods and data analysis
+\sitem Computer architecture, compilers, and parallel computing use numerical algorithms (matrix multiplication, Gaussian elimination) as benchmarks
+\end{itemize}
+}
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Example: Mechanics\footnote{{\it Variational Principles of Mechanics}, Cornelius Lanczos, Dover Books on Physics, 1949.}}
+
+\begin{itemize}
+
+\mitem Newton's laws provide incomplete particle-centric picture
+
+\mitem Physical systems can be described in terms of \coloremph{degrees of freedom} (DoFs)
+
+\begin{itemize}
+
+\sitem A piston moving up and down requires \fillnum{1} DoFs
+
+\sitem 1-particle system requires \fillnum{3} DoFs
+
+\sitem 2-particle system requires \fillnum{6} DoFs
+
+\sitem 2-particles at a fixed distance require \fillnum{5} DoFs
+
+\end{itemize}
+
+\mitem $N$-particle system \coloremph{configuration} described by $3N$ DoFs
+
+\lgcond{
+\begin{itemize}
+
+\mitem Trajectories in \coloremph{configuration space} ($\mathbb{R}^{3N}$) describe free energy configuration
+
+\mitem Various choice of \coloremph{basis functions} (i.e. coordinate system) for configuration space are possible
+
+\end{itemize}
+}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Course Structure}
+
+\begin{itemize}
+\item {\bf Complex numerical problems are generally reduced to simpler problems}
+
+  \lgcond{
+  \begin{itemize}
+  \sitem \coloremph{Discretization} corresponds to representing a continuous function/model by a discrete set of points
+  \sitem Nonlinear problems are mapped to linear problems
+  \sitem Complicated functions are mapped to polynomials
+  \sitem Differential equations are mapped to algebraic equations
+  \end{itemize}
+  }
+
+\item {\bf The course topics will follow this hierarchical structure}
+
+  \lgcond{
+  \begin{itemize}
+  \sitem Error, conditioning, and floating point are the starting point for representation and evaluation of algorithms for any numerical problem
+  \sitem Linear systems provide the simplest and most important building block for solving linear algebra problems
+  \sitem Least squares and eigenvalue problems provide basic technology for matrices
+  \sitem Nonlinear equations and optimization make use of matrix algebra to solve more general modelling problems
+  \sitem Numerical interpolation, differentiation, and quadrature provide the building blocks to reduce numerical PDE problems to matrix algebra
+  \end{itemize}
+  }
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Numerical Analysis}
+
+\begin{itemize}
+
+\item {\bf Numerical Problems involving Continuous Phenomena}:
+
+  \lgcond{
+    Given input $\Vec{x}\in\mathbb{R}^n$, approximate output $\Vec{y} = f(\Vec{x})$
+    \begin{itemize}
+    \item Problem is \coloremph{well-posed} if $f$ is a smoothly varying function, $f(\Vec{\hat{x}})\to f(\Vec{x})$ as $\Vec{\hat{x}} \to \Vec{x}$.
+    \item Otherwise, problem is \coloremph{ill-posed}
+    \end{itemize}
+
+  }
+
+\item {\bf Error Analysis}: 
+
+  \lgcond{
+    Quality of approximation is quantified by distance to the solution
+    \begin{itemize}
+
+    \item If solution $y=f(\Vec x)$ is a scalar, distance from computed solution $\hat{y}$ to correct answer is the \coloremph{absolute error}
+      \[\Delta y = \hat{y} - y,\]
+          while the normalized distance is the \coloremph{relative error}
+      \[\Delta y/y = \frac{\hat{y} - y}{y}\]
+    
+    \item More generally, we are interested in the error 
+      \[\Delta \Vec{y} = \Vec{\hat{y}} - \Vec{y} \]
+          the magnitude of which is measured by a given \coloremph{vector norm}
+
+    \end{itemize}
+  }
+
+\end{itemize}
+
+\end{frame}
+
+\section{Numerical Error}
+
+\begin{frame}{Sources of Error}
+
+\urcornerlinkdemo{01-error-and-fp}{Floating Point vs Program Logic}
+
+\begin{itemize}
+
+\item {\bf Representation of Numbers}: 
+  
+  \lgcond{
+
+  \begin{itemize}
+  \sitem We cannot represent arbitrary real numbers in a finite amount of space, e.g. a computer cannot exactly represent $\pi$
+  \sitem Moreover, hardware architectures are only well-fit to work with fixed-length (32-bit or 64-bit) representations
+  \sitem As we will see, the best we can do is represent a wide range of numbers with a relatively uniform \coloremph{precision}, which corresponds to \coloremph{scientific notation}
+  \sitem With scientific notation, we seek to store the most significant digits of each number, so that the magnitude of the relative error in the floating point representation $\fl(x)$ for most real numbers $x$ will be $|\fl(x) - x|/|x| \leq \epsilon$
+  \end{itemize}
+
+  }
+
+\item {\bf Propagated Data Error}:
+  \mdcond{ 
+  error due approximations in the input, $f(\hat{x})-f(x)$
+  }
+
+\item {\bf Computational Error = $\hat{f}(x)-f(x)$ = Truncation Error + Rounding Error}
+
+  \lgcond{ 
+    \begin{itemize}
+    \sitem \coloremph{Truncation error} is the error made due to approximations made by the algorithm (simplified models used in our approximation)
+    \sitem \coloremph{Rounding error} is the error made due to inexact representation of quantities computed by the algorithm
+    \end{itemize}
+  }
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Error Analysis}
+
+\begin{itemize}
+
+\item {\bf Forward Error}: 
+
+  \lgcond{ 
+    \coloremph{Forward error} is the computational error of an algorithm
+    \begin{itemize}
+    \item Absolute: $\hat{f}(x) - f(x)$
+    \item Relative: $(\hat{f}(x) - f(x))/f(x)$ 
+    \item Usually, we care about the \coloremph{magnitude} of the final error,
+          but carrying through signs is important when analyzing error
+    \end{itemize}
+  }
+  
+\item {\bf Backward Error}:
+
+  \lgcond{ 
+    It can be hard to tell what a `good' forward error is, but
+    \coloremph{backward error analysis} enables us to measure computational error
+    with respect to data propagation error
+    \begin{itemize}
+    \sitem An algorithm is \coloremph{backward stable} if its a solution to a nearby problem
+    \sitem If the computed solution $\hat{f}(x)=f(\hat{x})$ then
+           $$\text{backward error} = \hat{x}-x$$
+    \item More precisely, we want the nearest $\hat{x}$ to $x$ with $\hat{f}(x)=f(\hat{x})$
+    \sitem If the backward error is smaller than the propagated data error, the solution computed by the algorithm is as good as possible
+    \end{itemize}
+    
+  }
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Conditioning}
+
+\urcornerlinkdemo{01-error-and-fp}{Conditioning of Evaluating tan}
+
+\begin{itemize}
+
+
+\item {\bf Absolute Condition Number}:
+
+  \lgcond{
+    The \coloremph{absolute condition number is a property of the problem}, which measures its sensitivity to perturbations in input
+    \[\kappa_\text{abs}(f) = \lim_{\text{size of input perturbation} \to 0} \quad \max_{\text{inputs}} \quad \max_{\text{perturbations in input}}\left|\frac{\text{perturbation in output}}{\text{perturbation in input}}\right|\]
+    For problem $f$ at input $x$ it is simply the derivative of $f$ at $x$,
+    \[\kappa_\text{abs}(f) =\lim_{\Delta x \to 0}  \left|\frac{f(x+\Delta x)-f(x)}{\Delta x}\right| = \left|\frac{df}{dx}(x)\right|\]
+    When considering a space of inputs $\mathcal{X}$ it is $\kappa_\text{abs} = \max_{x\in \mathcal{X}}\left|\frac{df}{dx}(x)\right|$
+  }
+
+\item {\bf (Relative) Condition Number}:
+
+  \lgcond{ 
+    The relative condition number considers relative perturbations in input and output, so that 
+    \[\kappa(f) = \kappa_\text{rel}(f) =  \max_{x\in \mathcal{X}}\lim_{\Delta x \to 0} \left|\frac{(f(x+\Delta x)-f(x))/f(x)}{\Delta x/x}\right| = \frac{\kappa_\text{abs}(f) |x|}{|f(x)|}\]
+  }
+
+\end{itemize}
+
+\end{frame}
+
+\section{Conditioning}
+
+\begin{frame}{Posedness and Conditioning}
+
+\begin{itemize}
+
+\item {\bf What is the condition number of an ill-posed problem?}
+
+  \lgcond{ 
+
+  \begin{itemize} 
+  \mitem If the condition number is bounded and the solution is unique, the problem is \coloremph{well-posed}
+  \mitem An \coloremph{ill-posed} problem $f$ either has no unique solution or has a (relative) condition 
+         number of $\kappa(f) = \infty$
+  \mitem This condition implies that the solutions to problem $f$ are continuous and differentiable 
+         in the given space of possible inputs to $f$
+  \mitem Sometimes well-posedness is defined to only require continuity
+  \mitem Generally, $\kappa(f)$ can be thought of as the reciprocal of the \coloremph{distance} (in an appropriate geometric 
+         embedding of problem configurations) from $f$ \coloremph{to the nearest ill-posed problem}
+  \end{itemize}
+
+
+  }
+  \lgcond{ }
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Stability and Accuracy}
+
+\begin{itemize}
+
+\item {\bf Accuracy}:
+
+  \lgcond{ 
+     An algorithm is \coloremph{accurate} if $\hat{f}(x)=f(x)$ for all inputs $x$ when $\hat{f}(x)$ is computed in infinite precision
+    \begin{itemize}
+    \sitem In other words, the truncation error is zero (rounding error is ignored)
+    \sitem More generally, an algorithm is accurate if its truncation error is negligible in the desired context
+    \sitem Yet more generally, the \coloremph{accuracy} of an algorithm is expressed in terms of bounds on the magnitude of its truncation error
+    \end{itemize}
+  }
+
+\item {\bf Stability}:
+
+  \lgcond{ 
+  An algorithm is \coloremph{stable} if its output in finite precision (floating point arithmetic)
+  is always near its output in exact precision 
+    \begin{itemize}
+    \sitem \coloremph{Stability} measures the sensitivity of an algorithm to \coloremph{roundoff error}
+    \sitem In some cases, such as the approximation of a derivative using a finite difference formula,
+           there is a trade-off between stability and accuracy
+    \end{itemize}
+  }
+  \lgcond{} 
+
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}{Floating Point Numbers}
+%
+%\begin{itemize}
+%
+%\item {\bf Scientific Notation}
+%
+%  \lgcond{ }
+%
+%\item {\bf Significand (Mantissa) and Exponent}
+%
+%  \lgcond{ }
+%
+%\end{itemize}
+%
+%\end{frame}
+%
+%\begin{frame}{Rounding Error}
+%
+%\begin{itemize}
+%
+%\item {\bf Machine Epsilon}
+%
+%  \lgcond{ }
+%
+%\item {\bf Rounding Error Analysis}
+%
+%  \lgcond{ }
+%
+%\end{itemize}
+%
+%\end{frame}
+%
+%\begin{frame}{Rounding Error in Operations}
+%
+%\begin{itemize}
+%
+%\item {\bf Addition and Subtraction}
+%
+%  \lgcond{ }
+%
+%\item {\bf Multiplication and Division}
+%
+%  \lgcond{ }
+%
+%\end{itemize}
+%
+%\end{frame}
+%
+%\begin{frame}{Subnormal Numbers}
+%
+%\begin{itemize}
+%
+%\item {\bf Subnormal (Denormal) Number Range}
+%
+%  \lgcond{ }
+%
+%\item {\bf Gradual Underflow: Avoiding underflow in addition}
+%
+%  \lgcond{ }
+%
+%\end{itemize}
+%
+%\end{frame}
+%
+%
+
+
+%\end{document}
+
+\begin{frame}{Error and Conditioning}
+
+\urcornerlinkdemo{01-error-and-fp}{Truncation vs Rounding}
+
+\begin{itemize}
+\item Two major sources of error: \coloremph{roundoff} and \coloremph{truncation} error.
+\begin{itemize}
+\sitem roundoff error concerns floating point error due to finite precision
+\sitem truncation error concerns error incurred due to algorithmic approximation, e.g. the representation of a function by a finite Taylor series
+  \lgcond{
+    \[f(x+h) \approx g(h) = \sum_{i=0}^{k} \frac{f^{(i)}(x)}{i!}h^i\]
+    The absolute truncation error of this approximation is
+    \[f(x+h) - g(h) = \sum_{i=k+1}^{\infty} \frac{f^{(i)}(x)}{i!}h^i = O(h^{k+1}) \ \text{as}\ h\to 0\]
+  }
+\vspace{-.1in}
+\end{itemize}
+\item To study the propagation of roundoff error in arithmetic we can use the notion of conditioning.
+  \lgcond{
+    The condition number tells use the worst-case amplification of output error with respect to input error
+    \[\kappa(f) =  \max_{x\in \mathcal{X}}\lim_{\Delta x \to 0} \left|\frac{(f(x+\Delta x)-f(x))/f(x)}{\Delta x/x}\right| = \frac{|f'(x) x|}{|f(x)|}\]
+  }
+\end{itemize}
+
+\end{frame}
+
+\section{Floating Point}
+
+\begin{frame}{Floating Point Numbers}
+
+\dblurcornerlinkdemo{01-error-and-fp}{Picking apart a floating point number}{01-error-and-fp}{Density of Floating Point Numbers}
+
+\begin{itemize}
+
+\item {\bf Scientific Notation}
+
+  \lgcond{ 
+    Floating-point numbers are a computational realization of scientific notation, 
+    \[4.12165 \times 10^6, 2.145 \times 10^{-3}\]
+    \begin{itemize}
+    \item Scientific-notation provides a unique representation of any real number
+          for a given amount of `precision' (number of significant digits)
+    \sitem Normalized floating-point numbers are just a binary form of scientific notation, 
+    \[1.01001 \times 2^5, 1.0110 \times 2^{-3}\]
+    \end{itemize}
+  }
+
+\item {\bf Significand (Mantissa) and Exponent} Given $x$ with $s$ leading bits $x_0,\ldots, x_{s-1}$
+  \lgcond{ 
+    $$\mathit{fl}(x)=\sum_{i=0}^{s-1} x_i 2^{k-i}=\underbrace{x_0.x_1\ldots x_{s-1}}_\text{significand/mantissa}\times 2^{\underbrace{k}_\text{exponent}}$$
+  A floating point number's binary representation has $s-1$ significand
+  bits (excluding $x_0=1$), some bits to represent the exponent, and a sign bit
+  }
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Rounding Error}
+
+\dblurcornerlinkdemo{01-error-and-fp}{Floating point and the Harmonic Series}{01-error-and-fp}{Floating Point and the Series for the Exponential Function}
+
+\begin{itemize}
+
+\item {\bf Maximum Relative Representation Error (Machine Epsilon)}
+
+  \lgcond{ 
+    \begin{itemize}
+    \item If we have $s$ significant digits in scientific notation, our error is bounded to variations of $1$ in least significant digit, whose magnitude relative to the number we are trying to represent is $10^{1-s}$ in decimal and $2^{1-s}$ in binary
+    \mitem Formally, with $s$ significant binary digits the \coloremph{relative representation error} of positive real number $x$ is (with $k=\lfloor\log_{2}(|x|)\rfloor$ and each $x_i\in\{0,1\}$)
+          \[x=\sum_{i=0}^\infty x_i 2^{k-i} = x_\text{rem} + \sum_{i=0}^{s-1} x_i 2^{k-i}, \quad \text{where} \quad 
+           |x_\text{rem}/x| \leq 2^{1-s}
+          \]
+    \item The maximum such error, $2^{1-s}$, is called \coloremph{machine epsilon},
+\         \[\emach=\argmin_{\emach>0}(\mathit{fl}(1+\emach)=1+\emach)\]
+    \end{itemize}
+  }
+  \lgcond{}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Rounding Error in Operations (I)}
+
+\urcornerlinkdemoinclass{01-error-and-fp}{Catastrophic Cancellation}{inclass-fp}{Cancellation in Standard Deviation Computation}
+
+\begin{itemize}
+
+\item {\bf Addition and Subtraction}
+
+  \lgcond{ 
+      \begin{itemize}
+      \item Subtraction is just negation of a sign bit followed by addition
+      \sitem \coloremph{Catastrophic cancellation} occurs when the magnitude of the result is much smaller than the magnitude of both operands
+      \sitem Cancellation corresponds to losing significant digits, e.g.
+        \[3.1423\times 10^{5} - 3.1403\times 10^{5} = 2.0 \times 10^{2}\]
+      \item Generally, we can bound the error incurred during addition of two real numbers $x,y$ 
+            in floating point (ignoring final rounding, which has relative error $\emach$) as
+        \[\frac{|(x+y)-(\fl(x)+fl(y)|}{|x+y|} \leq \frac{\emach(|x|+|y|)}{|x+y|}\]
+      by this we can also observe that the condition number of addition of $x,y$ i.e. $f(x,y)=x+y$, is $\kappa(f(x,y)) = (|x|+|y|)/|x+y|$
+      \sitem Consequently, when $x+y=0$ and $x,y\neq0$ addition is \coloremph{ill-posed}
+%so the number of significant digits is only roughly maintained when $|x+y|\approx |x|+|y|$
+      \end{itemize}
+  }
+  \lgcond{}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Rounding Error in Operations (II)}
+
+\urcornerlinkdemo{01-error-and-fp}{Polynomial Evaluation Floating Point}
+
+\begin{itemize}
+
+\item {\bf Multiplication and Division}
+
+  \lgcond{ 
+    \begin{itemize}
+    \item Multiplication is a lot safer than addition in floating point
+    \sitem To analyze its error, we use a 2-term \coloremph{Taylor series approximation} typical in relative error analysis
+      \[f(\epsilon)= (1+n\epsilon)^k\approx f(0)+\frac{df}{d\epsilon}(0)\epsilon = 1+ kn\epsilon\]
+    since $\epsilon$ is small, this linear approximation is accurate (to within $O(\emach^2)$)
+    \sitem Aside from final rounding, we can bound the error in multiplication as
+        \[\frac{|xy-\fl(\fl(x)fl(y))|}{|xy|} \leq \frac{|xy-(x(1+\emach)y(1+\emach))(1+\emach)|}{|xy|} \approx 3\emach\]
+    \item Consequently, multiplication $f(x,y)=xy$ is always \coloremph{well-conditioned}, $\kappa(f)\approx 3$
+    \sitem Division is multiplication by the reciprocal, and reciprocation is also well-conditioned
+    \end{itemize}
+  }
+  \lgcond{}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Exceptional and Subnormal Numbers}
+
+\begin{itemize}
+
+\item {\bf Exceptional Numbers}
+      
+  \lgcond{
+      We had mentioned that the leading bit in normalized floating point numbers is assumed to be $1$, but how do represent $0$?
+      \begin{itemize}
+      \item \coloremph{Exceptional} floating point numbers are $0,-0,\infty,-\infty,$ and $\text{NaN}=0/0=\infty-\infty$
+      \end{itemize}
+  }
+
+\item {\bf Subnormal (Denormal) Number Range}
+
+  \lgcond{
+  \begin{itemize}
+  \item The range of magnitudes of normalized floating point numbers with an exponent range $[-e,e]$ is $[2^{-e},2^{e+1}(1-\emach/2)]$
+  \sitem For numbers of magnitude $<2^{-e}$, the relative representation error is unbounded
+
+  \sitem \coloremph{Subnormal numbers} are evenly spaced in $[-2^{-e},2^{-e}]$ with gaps of $\emach 2^{-e}$
+  \sitem Consequently, the absolute representation error in $[-2^{-e},2^{-e}]$ is at most $\emach 2^{-e}$
+  \end{itemize} 
+  }
+
+\item {\bf Gradual Underflow: Avoiding underflow in addition}
+
+  \lgcond{ 
+    The main benefit of subnormal numbers is that for any \coloremph{machine numbers} (floating-point numbers) $x$ and $y$, 
+  \(\fl(x-y)=0\) if and only if $x=y$, since the gap between any two representable numbers is $|x-y|\geq \emach 2^{-e}$
+  }
+
+\end{itemize}
+
+\end{frame}
+
+
+%\begin{frame}{Vector Norms}
+%
+%\begin{itemize}
+%\item {\bf Properties of vector norms}
+%
+%  \lgcond{ }
+%
+%\item {\bf $p$-norms}
+%
+%  \lgcond{ }
+%
+%\end{itemize}
+%
+%\end{frame}
+%
+%\begin{frame}{Inner-Product Spaces}
+%
+%\begin{itemize}
+%\item {\bf Properties of inner-product spaces}
+%
+%  \lgcond{ }
+%
+%\item {\bf Inner-product-based vector norms}
+%
+%  \lgcond{ }
+%
+%\end{itemize}
+%\end{frame}
+
+
+
+%\end{document}

@@ -1,0 +1,123 @@
+#! /usr/bin/env python3
+
+import gzip
+import argparse
+import re
+
+HEADER = (  # noqa
+b"""<?xml version="1.0" standalone="no"?>
+<xournal version="0.4.8">
+<title>Xournal document - \
+see http://math.mit.edu/~auroux/software/xournal/</title>
+""")
+
+FOOTER = b"</xournal>"
+
+
+PAGE_RE = re.compile(r"^(.+)\@([-:,0-9]+)$")
+RANGE_RE = re.compile(r"^([-0-9]*)\:([-0-9]*)$")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-o', '--output', metavar="OUTPUT.XOJ",
+        required=True)
+    parser.add_argument('inputs', metavar="INPUT.XOJ[@m:n]", nargs="+")
+    parser.add_argument(
+        '-d', '--delete-layers', metavar='LAYER', type=int, nargs='*',
+        help='Layers to delete, 1-based', default=[])
+
+    args = parser.parse_args()
+
+    out_lines = [HEADER]
+
+    for input_name in args.inputs:
+        page_slices = []
+        page_match = PAGE_RE.match(input_name)
+        if page_match is not None:
+            input_name = page_match.group(1)
+            page_ranges = page_match.group(2)
+            for page_range in page_ranges.split(","):
+                if ":" in page_range:
+                    start = None
+                    end = None
+
+                    range_match = RANGE_RE.match(page_range)
+                    if range_match is not None:
+                        if range_match.group(1):
+                            start = int(range_match.group(1))
+                            if start > 0:
+                                start -= 1
+                        if range_match.group(2):
+                            end = int(range_match.group(2))
+                            if end > 0:
+                                end -= 1
+
+                    page_slices.append(slice(start, end))
+                else:
+                    p = int(page_range)
+                    page_slices.append(slice(p-1, p))
+
+        else:
+            page_slices.append(slice(None))
+
+        with gzip.open(input_name, "rb") as inf:
+            lines = list(inf.readlines())
+
+        assert lines[0].startswith(b"<?xml")
+        assert lines[1].startswith(b"<xournal ")
+        assert lines[2].startswith(b"<title>")
+        assert lines[-1].startswith(b"</xournal>")
+        lines = lines[3:-1]
+
+        num_pages = len([
+            l for l in lines if l.strip().startswith(b"<page")
+            ])
+
+        pages = set()
+        for ps in page_slices:
+            pages.update(range(*ps.indices(num_pages)))
+
+        print("%s: %s" % (input_name, [pnr+1 for pnr in sorted(pages)]))
+
+        i = 0
+
+        ignoring_layer = False
+        ignoring_page = False
+
+        page_idx = -1
+        while i < len(lines):
+            l = lines[i]
+            i += 1
+
+            if ignoring_page:
+                if l.strip().startswith(b"</page"):
+                    ignoring_page = False
+            elif ignoring_layer:
+                if l.strip().startswith(b"</layer"):
+                    ignoring_layer = False
+            else:
+                if l.strip().startswith(b"<page"):
+                    layer_idx = 0
+                    page_idx += 1
+                    if page_idx not in pages:
+                        ignoring_page = True
+                    else:
+                        out_lines.append(l)
+                elif l.strip().startswith(b"<layer"):
+                    layer_idx += 1
+                    if layer_idx in args.delete_layers:
+                        ignoring_layer = True
+                    else:
+                        out_lines.append(l)
+                else:
+                    out_lines.append(l)
+
+    out_lines.append(FOOTER)
+
+    with gzip.open(args.output, "wb") as outf:
+        outf.write(b"".join(out_lines))
+
+if __name__ == "__main__":
+    main()

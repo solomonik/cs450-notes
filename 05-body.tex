@@ -1,0 +1,725 @@
+%%\documentclass[handout]{beamer}
+%\documentclass[aspectratio=169,13pt]{beamer}
+
+%\input{./preamble}
+
+\subtitle{Nonlinear Equations}
+
+\date{}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Problem and Approach}
+
+\begin{frame}{Solving Nonlinear Equations}
+
+\urcornerlinkinclass{inclass-newton-2-by-2}{Newton's Method for 2-by-2 System of Equations}
+
+\begin{itemize}
+\item
+Solving (systems of) nonlinear equations corresponds to root finding:
+\begin{itemize}
+\sitem $f(x^*)=0$ \smcond{univariate nonlinear function}
+\sitem $f(\B{x}^*)=0$ \smcond{multivariate, scalar-valued nonlinear function}
+\sitem $\B f(\B x^*) = \B 0$ \smcond{multivariate, vector-valued nonlinear function}
+\sitem Algorithms for root-finding make it possible to solve systems of nonlinear equations and employ a similar methodology to finding minima in optimization.
+\end{itemize}
+
+%\mdcond{}
+
+\sitem
+Main algorithmic approach: find successive roots of local linear approximations of $\B f$:
+
+\lgcond{
+\begin{itemize}
+%\item various alternatives exist, including simple $\B g(\B x) = \B x - \B f(\B x)$
+\item Newton's method for univariate functions starting at point $x_k$ finds root of $ h(\delta x) = f(x_k) + f'(x_k)\delta x\approx f(x_k+\delta x)$, so
+\[x_{k+1} = x_k + \delta x =  x_k - f(x_k)/f'(x_k)\]
+\item Newton's method for multivariate functions starting at point $\B x_k$ finds root of $\B h(\B{\delta x}) = \B f(\B x_k) + \B J_{\B f}(\B x_k)\B{\delta x}\approx \B f(\B x_k+\B{\delta x})$, with
+Jacobian $(\B J_{\B f}(\B x))_{ij} = \frac{\delta f_i}{\delta x_j}(\B x)$, so
+  \[\B x_{k+1} = \B x_{k} + \B{\delta x} = \B x_k - \B J^{-1}_{\B f}(\B x_k) \B f(\B x_k)\]
+%\sitem Newton's method achieves very rapid convergence due to the derivative/Jacobian of the fixed-point function going to zero at the root, i.e. 
+%\[g'(x^*)=0 \quad \text{and more generally} \quad \B J_{\B g}(\B x^*)=\B O\]
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\section{Existence, Uniqueness, and Conditioning}
+
+\begin{frame}{Nonexistence and Nonuniqueness of Solutions}
+
+\urcornerlinkdemo{05-nonlinear-equations}{Three quadratic functions}
+
+\begin{itemize}
+\item Solutions do not generally exist and are not generally unique, even in the univariate case:
+
+\lgcond{
+Consider functions that are strictly greater than zero or have many zeros.
+}
+
+\item Solutions in the multivariate case correspond to intersections of hypersurfaces:
+
+\lgcond{
+The zeros of each equation define a \coloremph{hypersurface} in $\mathbb{R}^{n}$, in the linear case, these are \coloremph{hyperplanes}.
+Intersections of hypersurfaces for many equations, define the solutions, which are roots of all equations. 
+
+\smallskip
+
+Consider that two curves can intersect at many points in space. 
+Two hypersurfaces in three-dimensional space may not intersect or may have multiple \coloremph{curves of intersection}.
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Conditions for Existence of Solution}
+
+\begin{itemize}
+\item \coloremph{Intermediate value theorem} for univariate problems:
+
+\lgcond{
+If for $a<b$, $\mathop{sign}(f(a))\neq \mathop{sign}(f(b))$ and $f$ is continuous, then $[a,b]$ is a \coloremph{bracket} that contains a root,
+\[\exists x^*{\in}[a,b],\quad f(x^*)=0.\]
+}
+\item A function has a unique \coloremph{fixed point} $\B g(\B x^*)= \B x^*$ in a given closed domain if it is \coloremph{contractive} and contained in that domain, 
+\[||\B g(\B x) - \B g (\B z)|| \leq \gamma ||\B x - \B z||\]
+
+\lgcond{
+\begin{itemize}
+\item Contained implies that in the domain $S$, for any $\B x \in S$,  $\B g( \B x) \in S$, while contractive implies that the function is Lipschitz continuous in $S$.
+\sitem When solving for a root of $\B f$, can define various fixed point functions $\B g$, so that their solution $\B g(\B x^*) = \B x^*$ provides a root of $\B f$, $\B f(\B x^*) =\B 0$, the simplest being $\B g(\B x)=\B f(\B x) + \B x$.
+\end{itemize}
+}
+\end{itemize}
+
+\end{frame}
+
+
+%\begin{frame}{Conditions for Uniqueness of Solution}
+%
+%\begin{itemize}
+%\item  The solution is unique within a neighborhood, if for root $\B x^*$, \(\B{J}_{\B{f}}(\B{x}^*)\) is nonsingular:
+%\lgcond{
+%\[ \B J_{\B{f}} (\B{x}) = {\footnotesize \begin{bmatrix}
+%     \frac{df_1}{dx_1}(\B{x}) & \cdots & \frac{df_1}{dx_n}(\B{x})\\
+%     \vdots &  & \vdots \\
+%     \frac{df_m}{dx_1}(\B{x}) & \cdots & \frac{df_m}{dx_n}(\B{x})
+%   \end{bmatrix}   }\]
+%If $\B{J}_{\B{f}}(\B{x}^*)$ is singular, $\exists \B s \neq \B 0$ so that $\B{J}_{\B{f}}(\B{x}^*)\B s=\B 0$, which means a linear approximation cannot distinguish the solution from a nearby point, $\B x^* + \alpha \B s$, which may or may not be another root.
+%
+%}
+%\lgcond{}
+%\end{itemize}
+%
+%\end{frame}
+
+\section{Multiple Roots and Conditioning}
+
+\begin{frame}{Conditioning of Nonlinear Equations}
+
+\begin{itemize}
+\item Generally, we take interest in the absolute rather than relative conditioning of solving $\B f(\B x)= \B 0$:
+
+\lgcond{
+\begin{itemize}
+\item The sensitivity of solving a nonlinear equation is the ratio of magnitudes of the perturbation to the root and perturbation to the function values.
+\sitem It makes sense to consider absolute perturbations to $\B f$, since any nonzero perturbation to function values is infinite in magnitude relative to $\B f(\B x^*)=\B 0$.
+\end{itemize}
+}
+
+\item The \coloremph{absolute condition number} of finding a root $x^*$ of $f$ is $1/|f'(x^*)|$ and for a root  $\B x^*$ of $\B f$ it is  $||\B{J}_{\B f}^{-1}(\B x^*)||$:
+
+\lgcond{
+\begin{itemize}
+\item  If we change the value of $f$ by at most $\delta f$ at any point in the function while maintaining continuity, the root will shift by at most $|\delta f|/|f'(x^*)|$ assuming $|\delta f|$ is sufficiently small.
+\sitem This relationship is the converse of conditioning in function evalution, where a perturbation to input $x$, results in a perturbation of at most $\kappa_\text{abs}(f)=|f'(x)|$ larger to the function value.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Multiple Roots and Degeneracy}
+
+\begin{itemize}
+\item If $x^*$ is a root of $f$ with \coloremph{multiplicity} $m$, its $m-1$ derivatives are also zero at $x^*$, 
+\[f(x^*)=f'(x^*)=f''(x^*) = \cdots = f^{(m-1)}(x^*)=0.\]
+
+\lgcond{
+Proof: for some function $t^{(0)}(x)$, we have that 
+\begin{align*}
+f(x) &= (x-x^*)^mt^{(0)}(x), \\
+f'(x) &= m(x-x^*)^{m-1}t^{(0)}(x) + (x-x^*)^mt^{(0)'}(x) \\
+&\equiv (x-x^*)^{m-1} t^{(1)}(x), \\
+f^{(m-1)}(x) &=  (x-x^*)t^{(m-1)}(x),
+\end{align*}
+where $t^{(i)} = (m-i+1)t^{(i-1)}(x) - (x-x^*)t^{(i-1)'}(x)$.
+}
+
+\item Increased multiplicity affects conditioning and convergence:
+
+\lgcond{
+\begin{itemize}
+\item When a root $x^*$ not \coloremph{simple}, i.e. $m>1$, then $f'(x^*)=0$, so the problem of finding that root is ill-posed as $1/|f'(x^*)| = \infty$.
+\sitem In practice, this means we have multiple roots at the same $x^*$ which are impossible to distinguish and may need to reformulate problem/algorithms.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+\section{Algorithms for Single-Variate Problems}
+
+\subsection{Bisection}
+
+\begin{frame}{Bisection Algorithm}
+
+\urcornerlinkdemo{05-nonlinear-equations}{Bisection Method}
+
+\begin{itemize}
+\item Assume we know the desired root exists in a bracket $[a,b]$ and $\mathop{sign}(f(a))\neq\mathop{sign}(f(b))$:
+
+\lgcond{
+\begin{itemize}
+\item if $f$ is continuous, by the intermediate value theorem, the bracket contains a root
+\sitem can proceed to narrow interval to find a root
+\sitem one caveat is that multiple roots may exist in $[a,b]$ 
+\sitem another caveat is that we've imposed a restrictive condition, it can be difficult to find two points where the function has opposite sign
+\end{itemize}
+}
+
+\item Bisection subdivides the interval by a factor of two at each step by considering $f(c_k)$ at $c_k=(a_k+b_k)/2$:
+
+\lgcond{
+\[[a_{k+1},b_{k+1}] = \begin{cases} [c_k,b_k] & : \mathop{sign}(f(a_k))=\mathop{sign}(f(c_k))   \\  [a_k, c_k] & : \mathop{sign}(f(b_k))=\mathop{sign}(f(c_k)) \end{cases}\]
+}
+
+\end{itemize}
+
+\end{frame}
+
+\subsection{Convergence Rates}
+
+\begin{frame}{Rates of Convergence}
+
+\urcornerlinkdemo{05-nonlinear-equations}{Rates of Convergence}
+
+\begin{itemize}
+\item Let $\B{x}_k$ be the $k$th iterate and $\B{e}_k=\B{x}_k=\B{x}^*$ be the error, bisection obtains \coloremph{linear convergence}, $\lim_{k\to \infty} ||\B{e}_k||/||\B{e}_{k-1}||\leq C$ where $C<1$:
+
+\lgcond{
+In bisection, working with the natural error bound given by bracket size,
+\[e_k = b_k-a_k = \frac{1}{2}(b_{k-1}-a_{k-1}) = \frac{1}{2}e_{k-1},\]
+so bisection achieves linear convergence with $C=1/2$.
+With linear convergence, error $e_k\leq \epsilon$ is achieved after $O(\log_C(1/\epsilon))$ steps.
+}
+
+\item $r$th order convergence implies that $||\B{e}_k||/||\B{e}_{k-1}||^r\leq C$
+
+\lgcond{
+\begin{itemize}
+\item Convergence of order $r>1$ (\coloremph{superlinear}) implies that the number of digits of correctness increases by a factor of $r$ at each step.
+\sitem For $r>1$, error $e_k\leq \epsilon$ is achieved after $O(\log_r(\log(1/\epsilon)))$ steps.
+\sitem Having achieved superlinear convergence ($r>1$), methods differ only by constant factors in complexity.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Convergence of Fixed Point Iteration}
+
+\begin{itemize}
+\item Fixed point iteration: $x_{k+1}=g(x_k)$ is locally linearly convergent if for
+      $x^* =g(x^*)$, we have $|g'(x^*)|< 1$:
+
+\lgcond{
+Note that,
+\[e_{k+1} = x_{k+1}-x^* = g(x_k) - g(x^*). \]
+By taking the Taylor expansion of $g$ at $x^*$ to represent $g(x_k)$, we can observe
+\begin{align*}
+e_{k+1}&= g'(x^*)(x_k-x^*)+O((x_k-x^*)^2)  \\
+        &= g'(x^*)e_k+O((x_k-x^*)^2) ,
+%&= g'(\theta_k)e_k, \quad \theta_k\in[x_k,x^*]
+\end{align*}
+where the asymptotic term decreases as $x_k$ approaches $x^*$.
+}
+
+
+\item It is quadratically convergent if $g'(x^*)=0$:
+
+\lgcond{
+Taking the same Taylor expansion, the leading term is now zero and we obtain 
+%Taylor's theorem allows us to show quadratic convergence,
+\begin{align*}
+e_{k+1}&= g''(x^*)(x_k-x^*)^2/2+O((x_k-x^*)^3) \\
+&= g''(x^*)e_k^2/2+O((x_k-x^*)^3) .
+%e_{k+1} &= x_{k+1}-x^* = g(x_k) - g(x^*) \\
+%&= g''(\zeta_k)(x_k-x^*)^2/2 \\
+%&= g''(\zeta_k)|e_k|^2/2, \quad \zeta_k\in[x_k,x^*]
+\end{align*}
+%where the asymptotic term decreases as $x_k$ approaches $x^*$.
+}
+
+\end{itemize}
+
+\end{frame}
+
+\subsection{Newton's Algorithm}
+
+\begin{frame}{Newton's Method}
+
+\dblurcornerlinkdemo{05-nonlinear-equations}{Newton's Method}{05-nonlinear-equations}{Convergence of Newton's Method}
+
+\begin{itemize}
+\item Newton's method is derived from a \coloremph{Taylor series} expansion of $f$ at $x_k$:
+
+\lgcond{
+\[f(x) = \underbrace{f(x_k) + f'(x_k)(x-x_k)}_{\text{secant line approximation} } + (1/2!)f''(x_k)(x-x_k)^2 + \cdots\]
+}
+
+\item Newton's method is \coloremph{quadratically convergent} if started sufficiently close to $x^*$ so long as $f'(x^*)\neq 0$:
+
+\lgcond{
+\begin{itemize}
+\item Newton's method corresponds to the fixed point function $g(x)=x-f(x)/f'(x)$.
+\mitem It achieves quadratic convergence since $g'(x^*)=0$,
+\[g'(x^*)= 1-\underbrace{f'(x^*)/f'(x^*)}_{1} + \underbrace{f(x^*)}_{0}f''(x^*)/f'(x^*)^2.\]
+%\[f(x^{*})-f(x_{k+1}) \leq (1/2)f''(x_k)(x-x_k)^2 + \cdots = (1/2)f''(\xi_k)||e_k||^2, \quad \xi_k\in[x_k,x^*]\]
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\subsection{Quasi-Newton Algorithms}
+
+\begin{frame}{Secant Method}
+
+\dblurcornerlinkdemo{05-nonlinear-equations}{Secant Method}{05-nonlinear-equations}{Convergence of the Secant Method}
+
+\begin{itemize}
+\item The \coloremph{Secant method} approximates $f'(x_k) \approx \frac{f(x_k)-f(x_{k-1})}{x_k-x_{k-1}}$:
+
+\lgcond{
+\begin{itemize}
+\item Usually, this method is the cheapest approximation possible, since function values $f(x_k)$ and $f(x_{k-1})$ are already available.
+\sitem Approximation quality depends on magnitude $f(x_k)-f(x_{k-1})$ and $x_k-x_{k-1}$.
+\sitem If the two points are far apart, the derivative approximation may be bad locally, while if they are very close we have to take care in handling cancellation.
+\sitem A well-chosen finite-difference step at each $x_k$ provides a more robust approximation, but requires another function evaluation.
+\end{itemize}
+
+}
+
+\item The convergence of the Secant method is \coloremph{superlinear} but not quadratic:
+
+\lgcond{
+\begin{itemize}
+\item The error will now depend on the previous two errors, since we are using the previous two points.
+\sitem In simplified form, the error at the $k$th iteration satisfies \(e_k\leq e_{k-1}e_{k-2}.\)
+\sitem Note that $\log(e_k)=\log(e_{k-1})+\log(e_{k-2})$ is the Fibonacci sequence, which grows at a rate of $r=(1+\sqrt{5})/2$.
+\sitem Thus the (negative) exponent of the error increases by roughly a factor of $r$ at each step, i.e. the convergence rate is $r$.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Nonlinear Tangential Interpolants}
+
+\begin{itemize}
+\item Secant method uses a linear interpolant based on points $f(x_k)$, $f(x_{k-1})$, could use more points and higher-order interpolant:
+
+\mdcond{
+Have points $(x_0,f(x_0)),\ldots,(x_{k},f(x_k))$ can fit polynomial to $p(x_i)=f(x_i)$ for some subset of points $x_i\in S\subseteq \{x_0,\ldots x_k\}$.
+}
+
+\item Quadratic interpolation (Muller's method) achieves convergence rate $r\approx 1.84$:
+
+\mdcond{
+Quadratic interpolation requires three points $x_{k-2}$, $x_{k-1}$, and $x_{k}$.
+}
+
+\item Inverse quadratic interpolation resolves the problem of nonexistence/nonuniqueness of roots of polynomial interpolants:
+
+\lgcond{
+\begin{itemize}
+\item Interpolate quadratic polynomial $q$ so that $q(f(x_i))=x_i$ for $i\in\{k,k-1,k-2\}$.
+\sitem Approximate root simply computed by evaluating interpolant at zero $x_{k+1}=q(0)$.
+\end{itemize}
+}
+
+
+\end{itemize}
+
+\end{frame}
+\section{Global Convergence}
+
+\begin{frame}{Achieving Global Convergence}
+
+\begin{itemize}
+\item Hybrid bisection/Newton methods:
+
+\lgcond{
+Given a bracket (interval), can proceed with bisection until bracket is small then switch to Newton.
+Alternatively, can attempt Newton, check if it stays within bracket (\coloremph{safeguard}) and proceed with change only if it does.
+}
+
+\item Bounded (damped) step-size:
+
+\lgcond{
+Newton's method gives us a direction. Decreasing the step size in that direction trades off convergence rate for reliability.
+We will study how step sizes can be chosen in more detail in the context of optimization.
+}
+
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}{Multivariate Fixed-Point and Newton Iteration}
+%
+%\begin{itemize}
+%\item Fixed-point iteration achieves local convergence so long as $|\lambda_\text{max}(\B{J}_{\B{g}}(\B x^*))|< 1$:
+%
+%\lgcond{}
+%
+%\item Newton's method corresponds to the fixed-point iteration $\B g(\B x) = \B x - \B J^{-1}_{\B f}(\B x) \B f(\B x)$
+%
+%\lgcond{}
+%
+%\end{itemize}
+%
+%\end{frame}
+%
+%\begin{frame}{Cost of Multivariate Newton Iteration}
+%
+%\begin{itemize}
+%\item What is the cost of computing $\B J_{\B f}(\B x)$?
+%
+%\lgcond{}
+%
+%\item What is the cost of solving $\B J_{\B f}(\B x)\B x_k = \B f (\B{x})$?
+%
+%\lgcond{}
+%
+%\end{itemize}
+%
+%\end{frame}
+%
+%
+%\begin{frame}{Secant Updating Methods}
+%
+%\begin{itemize}
+%\item Rather than compute $\B J_{\B f}(\B x_k)$ for each $\B{x}_k$, find $\B{B}_{k+1} = \B B_{k}+\B u \B v^T$ so tas to solve or approximate secant equation
+%\[\B{B}_{k+1}(\B{x}_{k+1}-\B{x}_k)=\B{f}(\B{x}_{k+1}-\B{x}_{k})\]
+%
+%\lgcond{}
+%
+%\item What is the cost of solving $\B J_{\B f}(\B x)\B x_k = \B f (\B{x})$?
+%
+%\lgcond{}
+%
+%\end{itemize}
+%
+%\end{frame}
+%
+%\begin{frame}{Global Convergence in the Multivariate Case}
+%
+%\begin{itemize}
+%\item Hybrid methods and step-size dampening:
+%
+%\lgcond{}
+%
+%\item Methods based on trust regions:
+%
+%\lgcond{}
+%
+%\end{itemize}
+%
+%\end{frame}
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+
+%
+
+\section{Systems of Nonlinear Equations}
+
+\subsection{Jacobian}
+
+\begin{frame}{Systems of Nonlinear Equations}
+
+\begin{itemize}
+\item
+Given $\B f(\B x) = \begin{bmatrix} f_1(\B x) & \cdots & f_m(\B x) \end{bmatrix}^T$ for $\B x \in \mathbb{R}^n$, seek $\B x^*$ so that $\B f(\B x^*)=\B 0$
+
+\lgcond{
+\begin{itemize}
+\item $\B{x}^*$ must simultaneously set to zero all components of $\B f$: $f_1(\B x^*)=\cdots = f_m(\B x^*)=0$.
+\sitem We focus on the case of $m=n$, so that the number of equations matches the number of unknowns.
+\end{itemize}
+}
+
+\item
+At a particular point $\B x$, the  \coloremph{Jacobian} of $\B f$, describes how $\B f$ changes in a given direction of change in $\B x$,
+\[ \B J_{\B{f}} (\B{x}) = \begin{bmatrix}
+     \frac{df_1}{dx_1}(\B{x}) & \cdots & \frac{df_1}{dx_n}(\B{x})\\
+     \vdots &  & \vdots \\
+     \frac{df_m}{dx_1}(\B{x}) & \cdots & \frac{df_m}{dx_n}(\B{x})
+   \end{bmatrix}   \]
+
+\lgcond{
+Our local linear approximation is given by
+\[\B f(\B x + \B{\delta x})\approx \B f(\B x) + \B J_{\B{f}} (\B{x})\B{\delta x},\]
+note that when $m=1$ the Jacobian corresponds to the gradient of $\B f$.
+}
+
+
+\end{itemize}
+
+\end{frame}
+
+\subsection{Newton's Algorithm}
+
+\urcornerlinkdemo{05-nonlinear-equations}{Newton's method in n dimensions}
+
+\begin{frame}{Multivariate Newton Iteration}
+
+\begin{itemize}
+\item Fixed-point iteration $\B{x}_{k+1}=\B{g}(\B{x}_k)$ achieves local convergence so long as $|\lambda_\text{max}(\B{J}_{\B{g}}(\B x^*))|< 1$ and quadratic convergence if $\B J_{\B g} = \B O$:
+
+\lgcond{
+%Given starting point $\B{x}_0$ close enough to $\B{x}^\star$, we will have $|\lambda_\text{max}(\B{J}_{\B{g}}(\B x_k))|<1$.
+Taking a multivariate Taylor expansion of $\B g(\B x_k)$ at center $\B x^{*}$ we get
+\begin{align*}
+\B e_k &= \B x^* - \B x_{k+1} \\
+       &= \B g(\B x^*) - \B g(\B x_k) \\
+       &= \underbrace{\B J_{\B g}(\B x^{*})}_{\B O} (\B x^* - \B x_{k})  \\
+&\ + \frac{1}{2}\begin{bmatrix} \B H_{\B g}^{(1)}(\B x^*)\cdot  (\B x^* - \B x_{k}) & \cdots & \B H_{\B g}^{(n)}(\B x^*)\cdot (\B x^* - \B x_{k})\end{bmatrix}(\B x^* - \B x_{k})\\
+||\B e_{k+1}|| &= O(\max_i||\B H_{\B g}^{(i)}(\B x^*)||\cdot ||\underbrace{\B x^*- \B x_{k}}_{\B e_{k}}||^2) \\
+       &= O( ||\B e_k||^2) 
+%\B g(\B x^*) &= \B x^* - \B J^{-1}_{\B f}(\B x^*) \B f(\B x^*) \\
+%\B{J_g}(\B x^*) &= \B I - \B J^{-1}_{\B f}(\B x^*)  \B J_{\B f}(\B x^*) - \sum_{i} \underbrace{f_i(\B x^*)}_{0}\B H_{\B f}^{(i)}(\B x^*) \\
+\end{align*}
+where $\B{H_g}^{(i)}$ is the $i$th component of the derivative of $\B J_{\B g}(\B x^*)$.
+}
+\lgcond{}
+
+\end{itemize}
+
+\end{frame}
+%
+%\begin{frame}{Convergence of Newton Iteration}
+%
+%\begin{itemize}
+%\item Newton's method achieves quadratic local convergence if $||\B J_{\B f}^{-1}(\B x)||$ is bounded near $\B x^*$:
+%
+%\lgcond{
+%\begin{align*}
+%\B e_k & = \B x_{k} - \B x^* = \B g(\B x_{k-1}) - \B x^* \\
+%       &= \B x_{k-1} - \B J_{\B{f}}^{-1} (\B{x}_{k-1}) \B f(\B x_{k-1}) - \B x^* \\
+%       &= \B J_{\B{f}}^{-1} (\B{x}_{k-1}) (\B f(\B x_{k-1}) -\B J_{\B{f}}(\B{x}_{k-1})(\B x^* -\B x_{k-1}))   \\
+%||\B e_k|| &\leq ||\B J_{\B{f}}^{-1} (\B{x}_{k-1})|| (||\B f(\B x_{k-1})|| + ||\B J_{\B{f}}(\B{x}_{k-1})||\cdot ||\B x^* -\B x_{k-1}||)   \\
+%       &= ||\B J_{\B{f}}^{-1} (\B{x}_{k-1}) ||O(||\B x^* -\B x_{k-1}||^2)   \\
+%       &= ||\B J_{\B{f}}^{-1} (\B{x}_{k-1}) ||O(||\B e_{k-1}||^2)
+%\end{align*}
+%}
+%\lgcond{}
+%
+%\end{itemize}
+%
+%\end{frame}
+
+
+\begin{frame}{Multidimensional Newton's Method}
+
+\begin{itemize}
+
+\item Newton's method corresponds to the fixed-point iteration 
+\[\B g(\B x) = \B x - \B J^{-1}_{\B f}(\B x) \B f(\B x)\]
+
+\lgcond{
+\begin{itemize}
+\item Note that generally Newton's method iteration has a fixed-point $\B{\bar{x}}$ whenever $\B f(\B{\bar{x}})=\B 0$, i.e. we have found a root of $\B f$, namely $\B{x}^*=\B{\bar{x}}$.
+
+\sitem Generally, we require that $\B J_{\B f}(\B x^*)$ is nonsingular, otherwise we can find nonzero solutions $\B y$ to  $\B J_{\B f}(\B x^*)\B y = \B f(\B x^*)=\B 0$.
+
+%\sitem When $m\neq n$ or $\B J_{\B f}(\B x^*)$ is singular, can instead use pseudoinverse or perform regularization.
+\end{itemize}
+}
+
+\item Quadratic convergence is achieved when the Jacobian of a fixed-point iteration is zero at the solution, which is true for Newton's method:
+\lgcond{
+\begin{align*}
+\B g(\B x^*) &= \B x^* - \B J^{-1}_{\B f}(\B x^*) \B f(\B x^*) \\
+\B{J_g}(\B x^*) &= \B I - \B J^{-1}_{\B f}(\B x^*)  \B J_{\B f}(\B x^*) - \sum_{i} \underbrace{f_i(\B x^*)}_{0}\B H_{\B f}^{(i)}(\B x^*) \\
+&= \B I - \B I - \B O = \B O
+\end{align*}
+where $\B{H_f}^{(i)}$ is the $i$th component of the derivative of $\B J^{-1}_{\B f}(\B x^*)$.
+}
+\end{itemize}
+
+\end{frame}
+
+\subsection{Quasi-Newton Algorithms}
+
+\begin{frame}{Estimating the Jacobian using Finite Differences}
+
+\begin{itemize}
+\item To obtain $\B J_{\B f}(\B x_k)$ at iteration $k$, can use finite differences:
+
+\lgcond{
+\begin{itemize}
+\item If $\B J_{\B f}(x)\in\mathbb{R}^{m\times 1}$ (single-variate but vector-valued $\B f$), we can estimate
+\[\B J_{\B f}(x_k) \approx (1/h)(\B f(x_k+h)- \B f(x_k)).\]
+
+\item
+More generally, the $i$th column of $\B{j}_i$ of the Jacobian $\B J_{\B f}(\B x_k)$ can be estimated by
+\[\B{j}_i\approx (1/h)(\B f(\B x_k+h \B e_i )- \B f(\B x_k)).\]
+\end{itemize}
+}
+
+\item $n+1$ function evaluations are needed: $\B f(\B x)$ and $\B f(\B x+h\B e_i), \forall i\in\{1,\ldots,n\}$, which correspond to $m(n+1)$ scalar function evaluations if $\B J_{\B f}(\B x_k)\in\mathbb{R}^{m\times n}$.
+\lgcond{}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Cost of Multivariate Newton Iteration}
+
+\begin{itemize}
+
+\item What is the cost of solving $\B J_{\B f}(\B x_k)\B s_{k} = \B f (\B{x}_k)$?
+
+\lgcond{$O(n^3)$}
+
+\item What is the cost of Newton's iteration overall?
+
+\lgcond{For $k$ steps, $O(n^3k+kn^2\gamma_\text{func-eval})$.}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Quasi-Newton Methods}
+
+\urcornerlinkinclass{inclass-broyden}{Broyden's Method}
+
+In solving a nonlinear equation, seek approximate Jacobian $\B J_{\B f}(\B x_k)$ for each $\B{x}_k$
+\begin{itemize}
+\item Find $\B{B}_{k+1} = \B B_{k}+\B{\delta B}_k \approx \B J_{\B f}(\B x_{k+1})$, so as to approximate \coloremph{secant equation}
+\[\B{B}_{k+1}(\underbrace{\B{x}_{k+1}-\B{x}_k}_{\B{\delta x}})=\underbrace{\B{f}(\B{x}_{k+1})-\B f(\B{x}_{k})}_{\B{\delta f}}\]
+
+\lgcond{
+Generally, the secant equation is underdetermined, as we usually need $n$ finite-difference formulas to determine $\B J_{\B f}(\B x_k)$, so
+the secant updating methods find only approximate $\B{B}_{k+1}$, usually as a modification of $\B{B}_{k}$.
+}
+
+\item \coloremph{Broyden's method} solves the secant equation and minimizes $||\B{\delta B}_{k}||_F$:
+\[\B{\delta B}_{k} = \frac{\B{\delta f} - \B{B}_k\B{\delta x}}{||\B{\delta x}||^2}\B{\delta x}^T\]
+
+\lgcond{
+Note that $\B{\delta B}_{k}$ is rank-1.
+Consequently, we can use the Sherman-Morrison formula to update $\B{B}^{-1}_{k+1}$ with $O(n^2)$ work.
+Various other variants exist.
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Safeguarding Methods}
+
+\begin{itemize}
+\item Can dampen step-size to improve reliability of Newton or Broyden iteration:
+
+\mdcond{
+\[\B x_{k+1} = \B x_k + \alpha_k \B s_k \quad \text{where} \quad \alpha_k\leq 1\]
+can pick $\alpha_k$ so to ensure $||\B f (\B x_{k+1})|| < ||\B f (\B x_{k})||$ or by doing a line-search to minimize $||\B f(\B x_k + \alpha_k \B s_k)||.$
+}
+
+\item \coloremph{Trust region methods} provide general step-size control:
+
+\mdcond{
+Establish/maintain/update region within which step is expected to be accurate.
+Pick each step to stay within trust region while minimizing $||\B f (\B x_{k+1})||$.
+Observe that the Newton-like generally seek to progress to a minima of $||\B f (\B x_{k+1})||$, and indeed much of the theory of these methods targets optimization.
+}
+\lgcond{}
+
+\end{itemize}
+
+\end{frame}
+
+
+
+
+
+%\begin{frame}{Secant Updating Methods}
+%
+%\begin{itemize}
+%\item Rather than compute $\B J_{\B f}(\B x_k)$ for each $\B{x}_k$, find $\B{B}_{k+1} = \B B_{k}+\B{\delta B}_k \approx \B J_{\B f}(\B x_{k+1})$, so as to solve or approximate secant equation
+%\[\B{B}_{k+1}(\underbrace{\B{x}_{k+1}-\B{x}_k}_{\B{\delta x}})=\underbrace{\B{f}(\B{x}_{k+1})-\B f(\B{x}_{k})}_{\B{\delta f}}\]
+%
+%\lgcond{
+%}
+%
+%\item Broyden's method is given by minimizing with minimal $||\B{\delta B}_{k}||_F$:
+%\[\B{\delta B}_{k} = \frac{\B{\delta f} - \B{B}_k\B{\delta x}}{||\B{\delta x}||^2}\B{\delta x}^T\]
+%
+%\lgcond{
+%}
+%
+%\end{itemize}
+%
+%\end{frame}
+%
+%\begin{frame}{Trust Region Methods}
+%
+%\begin{itemize}
+%\item Can dampen step-size to improve reliability of Newton's iteration:
+%
+%\mdcond{}
+%
+%\item \coloremph{Trust region methods} provide general step-size control:
+%
+%\mdcond{}
+%\lgcond{}
+%
+%\end{itemize}
+%
+%\end{frame}
+%
+%
+%
+%
+%
+%
+
+
+
+
+
+%\end{document}\end{document}

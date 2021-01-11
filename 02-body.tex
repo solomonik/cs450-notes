@@ -1,0 +1,742 @@
+%%\documentclass[handout]{beamer}
+%\documentclass[aspectratio=169,13pt]{beamer}
+
+%\input{./preamble}
+
+\subtitle{Linear Systems}
+\date{}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Vector and Matrix Norms}
+
+\begin{frame}{Vector Norms}
+
+\urcornerlinkdemo{01-error-and-fp}{Vector Norms}
+
+\begin{itemize}
+\item {\bf Properties of vector norms}
+  \mdcond{ 
+    \begin{align*}
+    ||\B x|| &\geq 0 \\
+    ||\B x|| &= 0  \quad\Leftrightarrow \quad\B x = \B 0 \\
+    ||\alpha \B x|| &= |\alpha|\cdot ||\B x|| \\
+    ||\B x + \B y|| &\leq ||\B x|| + ||\B y||\quad \text{(\coloremph{triangle inequality}) implies continuity}
+    \end{align*}
+    }
+\item {\bf A norm is uniquely defined by its unit sphere:}
+  \mdcond{
+    Surface defined by space of vectors $\mathbb{V}\subset \mathbb{R}^n$ such that $\forall \B x\in\mathbb{V}, ||\B x||=1$
+  }
+\item {\bf $p$-norms}
+  \mdcond{ 
+    $||\B x||_p = \bigg(\sum_{i} |x_i|^p\bigg)^{1/p}$
+    \begin{itemize}
+    \sitem $p=1$ gives sum of absolute values of entry (unit sphere is diamond-like)
+    \sitem $p=\infty$ gives maximum entry in absolute value (unit sphere is box-like)
+    \sitem $p=2$ gives Euclidean distance metric (unit sphere is spherical)
+    \end{itemize}
+  }
+  
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Inner-Product Spaces}
+
+\begin{itemize}
+\item {\bf Properties of inner-product spaces}:
+%
+%  \lgcond{ 
+    Inner products $\langle \B x, \B y \rangle$ must satisfy
+    \begin{align*}
+    \langle \B x, \B x\rangle  &\geq 0 \\
+    \langle \B x, \B x\rangle &= 0  \quad\Leftrightarrow \quad\B x = \B 0 \\
+    \langle \B x, \B y \rangle & =\langle \B y, \B x \rangle \\
+    \langle \B x, \B y + \B z \rangle & =\langle \B x, \B y \rangle + \langle \B x, \B z \rangle\\
+    \langle \alpha \B x, \B y \rangle & =\alpha \langle \B x, \B y \rangle 
+    \end{align*}
+%  }
+
+\item {\bf Inner-product-based vector norms}
+
+\lgcond{
+The $p=2$ vector norm is the Eucledian inner-product norm,
+  $$||\B x||_2=\sqrt{\B x^\T \B x}$$
+and due to Cauchy-Schwartz inequality $|\langle \B x, \B y\rangle|\leq \sqrt{\langle \B x, \B x\rangle\cdot \langle \B y, \B y\rangle}$,
+  $$|\B x^T\B y| \leq ||\B x||_2||\B y||_2.$$
+  Other inner-products can be expressed as $\langle \B x, \B y \rangle=\B x^\T\B A\B y$ where $\B A$
+  is symmetric positive definite, yielding norms $||\B x||_{\B A} = \sqrt{\B x^\T \B A \B x}$
+}
+
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Matrix Norms}
+
+\urcornerlinkdemo{02-linear-systems}{Matrix norms}
+
+\begin{itemize}
+\item {\bf Properties of matrix norms}:
+  %\lgcond{ 
+    \begin{align*}
+    ||\B A|| &\geq 0 \\
+    ||\B A|| &= 0  \quad\Leftrightarrow \quad\B A = \B 0 \\
+    ||\alpha \B A|| &= |\alpha|\cdot ||\B A|| \\
+    ||\B A + \B B|| &\leq ||\B A|| + ||\B B||\quad \text{(\coloremph{triangle inequality})}
+    \end{align*}
+   % }
+\item {\bf Frobenius norm}:
+    \smcond{
+      $$||\mathbf{A}||_F=\bigg(\sum_{i,j} a_{ij}^2\bigg)^{1/2}$$
+    }
+\item {\bf Operator/induced/subordinate matrix norms}:
+
+\lgcond{
+  For any vector norm $||\cdot ||$, the induced matrix norm is
+  \[||\B A|| = \max_{\B x\neq \B 0} ||\B A \B x||/||\B x|| = \max_{||\B x||=1} ||\B A \B x||\]
+
+}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Induced Matrix Norms}
+
+\begin{itemize}
+\item {\bf Interpreting induced matrix norms}:
+  \lgcond{
+  A matrix is uniquely defined with respect to a norm by a unit-ball, which is the space of vectors $\B y = \B A\B x$ for all $\B x$ on the unit-sphere of the norm.
+
+  $$||\B A||_{p}=\max_{||\B x||_p=1} ||\B A \B x||_p$$ is the maximum possible $p$-norm
+  \coloremph{amplification} due to application of $\B A$ 
+%(radius of unit-sphere enclosing unit-ball)
+
+  
+  $$1/||\B A^{-1}||_{p}=\min_{||\B x||_p=1} ||\B A \B x||_p$$ is the maximum possible $p$-norm
+  \coloremph{reduction} due to application of $\B A$ 
+%(radius of unit-sphere enclosed by unit-ball)
+  }
+\item {\bf General induced matrix norms}:
+  \lgcond{
+  $$||\B A||_{mp}=\max_{||\B x||_p=1} ||\B A \B x||_m$$
+  typically $m=p$ so we write $||\B A||_{p}$ and almost always we have $p\in\{1,2,\infty\}$.
+  (Computing the matrix norm for certain choices of $m\neq p$ is NP-complete.)
+  }
+
+
+\end{itemize}
+\end{frame}
+
+\section{Matrix Condition Number}
+
+\begin{frame}{Matrix Condition Number}
+
+\dblurcornerlinkdemo{02-linear-systems}{Conditioning of 2x2 Matrices}{02-linear-systems}{Condition number visualized}
+
+\begin{itemize}
+\item {\bf Definition}: $\kappa(\B A) = ||\B A|| \cdot||\B A^{-1}||$ is the ratio between the shortest/longest distances from the unit-ball center to any point on the surface.
+\mitem {\bf Intuitive derivation}:
+\begin{align*}
+\kappa(\B A) &= \max_{\text{inputs}} \quad \max_{\text{perturbations in input}}\left|\frac{\text{relative perturbation in output}}{\text{relative perturbation in input}}\right| 
+\end{align*}
+since a matrix is a linear operator, we can decouple its action on
+the input $\B x$ and the perturbation $\B{\delta x}$ since $\B A(\B x +\B{\delta x}) = \B A \B x + \B A \B{\delta x}$, so
+%&= \left|\frac{\max_{\text{perturbations in input}}\text{relative perturbation growth}}{\max_{\text{inputs}}\text{relative input reduction}}\right| \\
+\begin{align*}
+\kappa(\B A) &= \left|\frac{\overbrace{\max_{\text{perturbations in input}}\text{relative perturbation growth}}^{||\B A||}}{\underbrace{\max_{\text{inputs}} \text{relative input reduction}}_{1/||\B A^{-1}||}}\right| 
+\end{align*}
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Matrix Conditioning}
+
+\begin{itemize}
+\item The matrix condition number $\kappa(\B A)$ is the ratio between the max and min distance from the surface to the center of the unit ball transformed by $\kappa(\B A)$:
+\lgcond{
+\begin{itemize} 
+\item The max distance to center is given by the vector maximizing $\max_{||\B x||=1} ||\B A\B x||_2$.
+\sitem The min distance to center is given by the vector minimizing $\min_{||\B x||=1} ||\B A\B x||_2 = 1/(\max_{||\B x||=1} ||\B A^{-1}\B x||_2)$.
+\sitem Thus, we have that $\kappa(\B A) = ||\B A||_2||\B A^{-1}||_2$
+\end{itemize}
+}
+\item The matrix condition number bounds the worst-case amplification of error in a matrix-vector product:
+  \lgcond{
+  Consider $\B y + \B{\delta y}= \B A (\B x + \B{\delta x})$, assume $||\B x||_2=1$
+  \begin{itemize}
+  \mitem In the worst case, $||\B y||_2$ is minimized, that is $||\B y||_2 = 1/||\B A^{-1}||_2$
+  \mitem In the worst case, $||\B{\delta y}||_2$ is maximized, that is $||\B{\delta y}||_2 = ||\B A||_2||\B{\delta y}||_2$
+  \mitem So $||\B{\delta y}||_2/||\B{y}||_2$ is at most $\kappa(\B A)||\B{\delta x}||_2/||\B{x}||_2$
+  \end{itemize}
+  }
+
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}{Norms and Conditioning of Orthogonal Matrices}
+
+\begin{itemize}
+\item {\bf Orthogonal matrices}:
+  \mdcond{
+  A matrix $\B Q$ is orthogonal, if its square and its columns are orthonormal,
+  %\[ \B Q =\begin{bmatrix}\B {q_1} & \cdots & \B{q_2}\end{bmatrix}, \quad \langle \B{q_i},\B{q_j}\rangle =\delta_{i,j} = \begin{cases} 1 & : i=j \\ 0 & :i\neq j \end{cases}\]
+  or equivalently $\B Q^\T= \B Q^{-1}$.
+  }
+\item {\bf Norm and condition number of orthogonal matrices}:
+  \smcond{}
+  \lgcond{
+  For any $||\B v||_2=1$,
+  \begin{align*}
+    ||\B Q\B v||_2 &= \bigg( \Big\langle\B v^\T \B Q^\T,  \B{Q} \B v\Big\rangle\bigg)^{1/2}
+                   = \bigg( \B v^\T \B Q^\T  \B{Q} \B v\bigg)^{1/2}  =\bigg( \B v^\T \B v\bigg)^{1/2} \\
+                   &= ||\B v||_2
+  \end{align*}
+  Consequently, $||\B Q||_2=||\B Q^{-1}||_2 = \kappa(\B Q) = 1$.
+
+  \smallskip
+  $\B Q \B v$ expresses $\B v$ in a coordinate system whose axes
+  are columns of $\B Q^T$
+  }
+
+\end{itemize}
+
+\end{frame}
+
+\section{Singular Value Decomposition}
+
+\begin{frame}{Singular Value Decomposition}
+
+\begin{itemize}
+\item {\bf The singular value decomposition (SVD)}:
+
+  \lgcond{
+    We can express \coloremph{any} matrix $\B A$ as
+    $$\B A = \B U \B \Sigma \B V^\T$$
+    where $\B U$ and $\B V$ are orthogonal, and $\B \Sigma$ is square nonnegative and diagonal,
+    \[\B \Sigma = \begin{bmatrix} \sigma_\text{max} & & \\ & \ddots &\\& & \sigma_\text{min}\end{bmatrix}\]
+    \coloremph{Any matrix is diagonal when expressed as an operator mapping vectors from a coordinate
+    system given by $\B V$ to a coordinate system given by $\B U^\T$}.
+  }
+  \lgcond{}
+    
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Norms and Conditioning via SVD}
+
+\urcornerlinkinclass{inclass-svdnorm}{Singular Value Decomposition and Norms}
+
+\begin{itemize}
+\item {\bf Norm and condition number in terms of singular values}:
+
+  \lgcond{
+    When multiplying a vector by matrix $\B A = \B U \B \Sigma \B V^\T$
+    \begin{itemize}
+    \mitem Multiplication by $\B V^\T$ changes coordinate systems, leaving the norm unchanged
+    \mitem Multiplication by $\B U$ changes coordinate systems, leaving the norm unchanged
+    \end{itemize}
+    \medskip
+    so, only multiplication by $\B \Sigma$ has an effect on the vector norm
+    \begin{itemize}
+    \mitem Note that $||\B \Sigma||_2=\sigma_\text{max}$, $||\B \Sigma^{-1}||_2=1/\sigma_\text{min}$, so 
+    \[\kappa(\B A) =\kappa(\B \Sigma)=\frac{\sigma_\text{max}}{\sigma_\text{min}}\]
+    \end{itemize}
+  }
+  \lgcond{}
+\end{itemize}
+\end{frame}
+
+\section{Perturbation Analysis}
+
+\begin{frame}{Conditioning of Linear Systems}
+
+\begin{itemize}
+\item {\bf Lets now return to formally deriving the conditioning of solving $\B A \B x = \B b$}:
+
+  \lgcond{
+  Consider a perturbation to the right-hand side (input) $\B {\hat{b}} = \B b + \B{\delta b}$
+  \begin{align*}
+  \B A \B{\hat{x}} &= \B{\hat{b}} \\
+  \B A (\B x  +\B{\delta x}) &= \B{b} + \B{\delta b} \\
+  \B A\B{\delta x} &= \B{\delta b}
+  \end{align*}
+  we wish to bound the size of the relative perturbation to the output $||\B{\delta x}||/||\B{x}||$ with respect to the size of the relative perturbation the the input $||\B{\delta b}||/||\B{b}||$
+  \begin{align*}
+  \B{\delta x} &= \B A^{-1}\B{\delta b} \\
+  \frac{||\B{\delta x}||}{||\B{x}||} &= \frac{||\B A^{-1}\B{\delta b}||}{||\B{x}||} 
+  \leq  \frac{||\B A^{-1}||\cdot ||\B{\delta b}||}{||\B{x}||}
+%  \frac{||\B{\delta b}||}{||\B{b}||} =  \frac{||\B A\B{\delta x}||}{||\B{b}||} \leq  \frac{||\B A||\cdot ||\B{\delta x}||}{||\B{b}||}
+%  \frac{||\B{\delta b}||}{||\B{b}||} =  \frac{||\B A\B{\delta x}||}{||\B{b}||} \leq  \frac{||\B A||\cdot ||\B{\delta x}||}{||\B{b}||}
+  \end{align*}
+  we can use that $||\B{x}|| \geq ||\B{b}||/\sigma_\text{max}= ||\B{b}||/||\B{A}||$ so
+  \begin{align*}
+  \frac{||\B{\delta x}||}{||\B{x}||} \leq  \underbrace{||\B A||\cdot ||\B A^{-1}||}_{\kappa(\B A)}\cdot \frac{||\B{\delta b}||}{||\B{b}||} = \frac{\sigma_\text{max} ||\B{\delta b}||}{\sigma_\text{min} ||\B{b}||} 
+  \end{align*}
+  }
+  \lgcond{}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Conditioning of Linear Systems II}
+
+\begin{itemize}
+\item {\bf Consider perturbations to the input coefficients $\B {\hat{A}} = \B{A} + \B{\delta A}$}:
+
+  \lgcond{
+  In this case we solve the perturbed system 
+  \begin{align*}
+  \B{\hat{A}} \B{\hat{x}} &= \B{b} \\
+  \B A \B x  +\B{\delta \B A} \B x &= \B{b} - \B{\hat{A}} \B{\delta x} \\
+  \B{\delta A}\B x &=  -\B{\hat{A}} \B{\delta x} \approx - \B{A} \B{\delta x}
+  \end{align*}
+  we wish to bound the size of the relative perturbation to the output $||\B{\delta x}||/||\B{x}||$ with respect to the size of the relative perturbation the the input $||\B{\delta A}||/||\B{A}||$
+  \begin{align*}
+  \B{\delta x} &= -\B A^{-1}\B{\delta A}\B{x} \\
+  ||\B{\delta x}|| &= ||\B A^{-1}\B{\delta A}\B{x}|| \leq ||\B A^{-1}||\cdot ||\B{\delta A}|| \cdot ||\B{x}|| \\
+  \frac{||\B{\delta x}||}{||\B{x}||} &\leq \underbrace{||\B A^{-1}||\cdot ||\B {A}||}_{\kappa(\B A)} \cdot \frac{||\B{\delta A}||}{||\B A||}
+  \end{align*}
+  }
+  \lgcond{
+  }
+\end{itemize}
+\end{frame}
+
+\section{Algorithms for Simple Linear Systems}
+
+\begin{frame}[fragile]{Solving Basic Linear Systems}
+
+\begin{itemize}
+\item Solve $\B D \B x = \B b$ if $\B D$ is diagonal 
+
+    \smcond{$x_i = b_i/d_{ii}$ with total cost $O(n)$}
+
+\item Solve $\B Q \B x = \B b$ if $\B Q$ is orthogonal
+
+    \smcond{$\B x= \B Q^\T \B b$ with total cost $O(n^2)$}
+
+\item Given SVD $\B A = \B U \B \Sigma \B V^T$, solve $\B A \B x = \B b$
+
+    \mdcond{
+    \begin{itemize}
+    \item Compute $\B z = \B U^T\B b$
+    \item Solve $\B \Sigma \B y = \B z$ (diagonal)
+    \item Compute $\B x = \B V \B x$
+    \end{itemize}
+    }
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Solving Triangular Systems}
+
+\urcornerlinkdemo{02-linear-systems}{Coding back-substitution}
+
+\begin{itemize}
+\item {\bf $\B L \B x = \B b$ if $\B L$ is lower-triangular is solved by forward substitution:}
+    \filufil{
+    \begin{alignat*}{4}
+    l_{11}x_1 &= b_1 && &&x_{1} &&= b_1/l_{11} \\
+    l_{21}x_1 + l_{22}x_2 &=b_2 && \quad\Rightarrow \quad&& x_{2} &&= (b_2-l_{21}x_1)/l_{22} \\
+    l_{31}x_1 + l_{32}x_2 + l_{33}x_3 &=b_3 && && x_{3} &&= (b_3-l_{31}x_1-l_{32}x_2)/l_{33} \\
+          &\ \ \vdots && &&  && \ \ \vdots
+    \end{alignat*}
+    }{
+    \begin{alignat*}{4}
+    l_{11}x_1 &= b_1 && &&x_{1} &&= \quad\quad\quad  \quad\quad\quad\quad\quad\quad\\
+    l_{21}x_1 + l_{22}x_2 &=b_2 && \quad\Rightarrow \quad&& x_{2} &&= \hfill \\
+    l_{31}x_1 + l_{32}x_2 + l_{33}x_3 &=b_3 && && x_{3} &&= \hfill  \\
+          &\ \ \vdots && &&  && \ \ \vdots
+    \end{alignat*}
+  }
+\item {\bf Algorithm can also be formulated recursively by blocks:}
+   
+  \lgcond{ 
+    \[\blomat{l} \begin{bmatrix} x_1 \\ \B{x_2} \end{bmatrix} = \begin{bmatrix} b_1 \\ \B{b_2}\end{bmatrix}\]
+    $x_1=b_1/l_{11}$, then solve recursively for $\B{x_2}$ in $\B{L_{22}}\B{x_2} = \B{b_2}-\B{l_{21}}x_1$.
+  }
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Solving Triangular Systems}
+
+\begin{itemize}
+
+\item {\bf Existence of solution to $\B L \B x =\B b$:}
+
+    \mdcond{
+      If some $l_{ii}=0$, the solution may not exist, and $\B L^{-1}$ does not exist.
+    }
+\item {\bf Uniqueness of solution:}
+    \mdcond{ 
+      Even if some $l_{ii}=0$ and $\B L^{-1}$ does not exist, the system may have a solution.
+      The solution will not be unique since columns of $\B{L}$ are necessarily linearly dependent if a diagonal element is zero.
+      May want to select solution minimizing norm of $\B x$.
+    }
+\item {\bf Computational complexity of forward/backward substitution:}
+
+  \mdcond{
+  The recursive algorithm has the cost recurrence,
+  $$T(n)=T(n-1)+n=\sum_{i=1}^{n} i = n(n+1)/2.$$
+  The total cost is $n^2/2$ multiplications and $n^2/2$ additions to leading order. 
+  }
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Properties of Triangular Matrices}
+
+\begin{itemize}
+\item {\bf $\B Z = \B X \B Y$ is lower triangular is $\B X$ and $\B Y$ are both lower triangular:}
+
+  \lgcond{
+    \[\bomat{z}=\blomat{x}\blomat{y}.\]
+    Clearly, $z_{11}=x_{11}y_{11}$ and $\B z_{12}=0$, then we proceed by the same argument for the triangular matrix product 
+    $\B{Z}_{22}=\B{X}_{22}\B{Y}_{22}$.
+  }
+
+\item {\bf $\B{L^{-1}}$ is lower triangular if it exists:}
+    
+  \lgcond{
+    We give a constructive proof by providing an algorithm for triangular matrix inversion.
+    We need $\B{Y}=\B{X}^{-1}$ so 
+    \[\blmat{Y}\blmat{X} = \begin{bmatrix} \B I & \\ & & \B I \end{bmatrix},\]
+    from which we can deduce
+    \[\B{Y}_{11} = \B{X}_{11}^{-1},\quad \B{Y}_{22}=\B{X}_{22}^{-1},\quad \B{Y}_{21} = -\B{Y}_{22}\B{X}_{21}\B{Y}_{11}.\]
+  }
+
+
+\end{itemize}
+\end{frame}
+
+
+
+\section{Gaussian Elimination}
+
+\subsection{LU Decomposition}
+
+\begin{frame}{LU Factorization}
+
+\begin{itemize}
+\item {\bf An \coloremph{LU factorization} consists of a unit-diagonal lower-triangular \coloremph{factor} $\B L$ and upper-triangular factor $\B U$ such that $\B  A = \B L \B U$:}
+
+\lgcond{
+\begin{itemize}
+\mitem Unit-diagonal implies each $l_{ii}=1$, leaving $n(n-1)/2$ unknowns in $\B L$ and $n(n+1)/2$ unknowns in $\B U$, for a total of $n^2$, the same as the size of $\B A$.
+%\mitem The latter is done by forward substitution, the former involves an upper-triangular matrix and requires backward substitution
+%\mitem It suffices to have a forward substitution routine and reversing the ordering of vector elements, 
+%      done by taking the product with $\B P$, $p_{ij} = \delta(i,n+1-j)$,
+%    \[\B L \B U = \B L \B P \underbrace{\B P \B U \B P}_{\B{\tilde L}} \B P = \B L \B P \B{\tilde L} \B P\]
+\mitem For rectangular matrices $\B{A}\in \mathbb{R}^{m\times n}$, one can consider a full LU factorization, 
+      with $\B{L}\in \mathbb{R}^{m \times \max(m,n)}$ and $\B{U} \in \mathbb{R}^{\max(m,n) \times n}$, 
+      but it is fully described by a reduced LU factorization, with lower-trapezoidal
+      $\B{L}\in \mathbb{R}^{m \times \min(m,n)}$ and upper-trapezoidal $\B{U} \in \mathbb{R}^{\min(m,n) \times n}$.
+\end{itemize}
+}
+\item {\bf Given an LU factorization of $\B A$, we can solve the linear system $\B A \B x = \B b$:} 
+\lgcond{
+    \begin{itemize} 
+    \sitem using forward substitution $\B L \B y = \B b$
+    \sitem using backward substitution to solve $\B U \B x = \B y$
+    \end{itemize}
+\smallskip
+    Backward substitution is the same as forward substitution with a reversal of the ordering of the elements of the vectors and the ordering of the rows/columns of the matrix.
+}
+
+\lgcond{}
+
+\end{itemize}
+\end{frame}
+
+\subsection{Naive Algorithm}
+
+\begin{frame}{Gaussian Elimination Algorithm}
+
+\urcornerlinkdemo{02-linear-systems}{LU factorization}
+
+\begin{itemize}
+\item {\bf Algorithm for factorization is derived from equations given by $\B A = \B L \B U$:}
+
+\lgcond{
+%\[\bmat{A} = \blmat{L}\brmat{U}\]
+\[\begin{bmatrix} a_{11} & \B{a}_{12} \\ \B{a}_{21} & \B{A}_{22} \end{bmatrix}=
+\begin{bmatrix} 1 &  \\ \B{l}_{21} & \B{L}_{22} \end{bmatrix}
+\begin{bmatrix} u_{11} & \B{u}_{12} \\  & \B{U}_{22} \end{bmatrix}
+ = \blmat{L}\brmat{U}\]
+\begin{itemize}
+%\item Obtain LU factorization of the leading minor \(\B{A}_{11}=\B L_{11}\B{U}_{11}\) by recursion
+\sitem First, observe $\begin{bmatrix} u_{11} & \B{u}_{12}\end{bmatrix} = \begin{bmatrix}{a}_{11} & \B{a}_{12}\end{bmatrix}$
+\sitem To obtain $\B{l}_{21}$ compute $\B{l}_{21} = \B{a}_{21}/u_{11}$
+%\item Solve  sets of triangular linear systems can be solved to obtain $\B L_{21}$ and $\B{U}_{12}$ from $\B{A}_{21}=\B{L}_{21}\B{U}_{11}$ and $\B{A}_{12}=\B{L}_{11}\B{U}_{12}$
+\sitem 
+Obtain $\B{L}_{22}$ and $\B{U}_{22}$ by recursively computing LU of the \coloremph{Schur complement} \[\B{S}= \B{A}_{22}-\B{l}_{21}\B{u}_{12}\] 
+\end{itemize}
+}
+\item {\bf The computational complexity of LU is $O(n^3)$:}
+
+\lgcond{
+Computing $\B{l}_{21} = \B{a}_{21}/u_{11}$ requires $O(n)$ operations, finding $\B S$ requires $2n^2$, so to leading order the complexity of LU is
+$$T(n)=T(n-1)+2n^2=\sum_{i=1}^n 2i^2 \approx 2n^3/3$$ 
+}
+%\item {\bf The $k$th column of $\B L$ is given by the $k$th \coloremph{elementary matrix} $\B{M}_k$:}
+%
+%\lgcond{
+%\[\B{M}_k\begin{bmatrix} v_1 & \cdots & v_k & 0 & \cdots & 0 \end{bmatrix}^\T= \B{v} \]
+%}
+
+\end{itemize}
+\end{frame}
+
+\subsection{Existence of LU}
+
+\begin{frame}{Existence of LU Factorization}
+
+\begin{itemize}
+\item {\bf The LU factorization may not exist:}
+Consider matrix $\begin{bmatrix} 3 & 2 \\ 6 & 4 \\ 0 & 3\end{bmatrix}$.
+
+\lgcond{
+%We can infer what the first row of $\B L$ and column of $\B U$ directly from the matrix,
+Proceeding with Gaussian elimination we obtain
+\[\begin{bmatrix} 3 & 2 \\ 6 & 4 \\ 0 & 3\end{bmatrix} =\begin{bmatrix} 1 & 0 \\ 2 & 1 \\ 0 & l_{32} \end{bmatrix} \begin{bmatrix} 3 & 2 \\ 0 & u_{21} \end{bmatrix}.\]
+Then we need that $4 = 4+u_{21}$ so $u_{21}=0$, but at the same time $l_{32}u_{21}=3$.
+
+More generally, if and only if for any partitioning $\bmat{A}$ the leading minor is singular ($\det(\B{A}_{11})=0$), $\B{A}$ has no LU factorization.
+}
+
+\item {\bf Permutation of rows enables us to transform the matrix so the LU factorization does exist:}
+
+\lgcond{
+Gaussian elimination can only fail if dividing by zero. 
+At every recursive step of Gaussian elimination, if the leading entry of the first row is zero, we permute it with a row with an leading nonzero (if $\B{a}_{21}=\B 0$, we set $u_{11}=0$ and $\B{l}_{21}=\B 0$).
+}
+
+\end{itemize}
+\end{frame}
+%\begin{frame}{Elimination Matrices}
+%
+%\begin{itemize}
+%\item {\bf An elimination matrix $\B{M}_k$ satisfies the following properties:}
+%
+%\lgcond{
+%\begin{itemize}
+%\item It is a rank-$1$ perturbation of the identity that is unit-diagonal and lower-triangular,
+%\[ \B{M}_k = \B{I} - \B{m}_k \B{e}_k^\T=\B{I}-\begin{bmatrix} \B{\tilde{m}}_k \\ \B{0}\end{bmatrix} \B{e}_k^\T\]
+%\item It reduces a given vector to its first $k$ elements \[\B{M}_k\begin{bmatrix} a_1 \\ \vdots \\ a_k \\ 0 \\ \vdots\end{bmatrix}= \B{a} \]
+%\item $\B{M}_k^{-1}= \B{I}+\B{m}_k \B{e}_k^\T = 2\B{I} - \B{M}_k$
+%\item $\B{M}_j\B{M}_k=(\B{I} - \B{m}_j \B{e}_j^\T)(\B{I} - \B{m}_k \B{e}_k^\T)=(\B{I} - \begin{bmatrix} \B{m}_j & \B{m}_k \end{bmatrix}\begin{bmatrix} \B{e}_j & \B{e}_k\end{bmatrix}^\T)=\B{M}_j+\B{M}_k-\B I$
+%\end{itemize}
+%}
+%
+%\lgcond{}
+%
+%\end{itemize}
+%\end{frame}
+%
+
+\subsection{Pivoting}
+
+\begin{frame}{Gaussian Elimination with Partial Pivoting}
+
+\urcornerlinkdemo{02-linear-systems}{LU with Partial Pivoting}
+
+\begin{itemize}
+\item {\bf \coloremph{Partial pivoting} permutes rows to make divisor $u_{ii}$ is maximal at each step:}
+
+\lgcond{
+Based on our argument above, for any matrix $\B A$ there exists a permutation matrix $\B P$ that
+can permute the rows of $\B A$ to permit an LU factorization,
+\[\B P \B A = \B L \B U. \]
+Partial pivoting finds such a permutation matrix $\B P$ one row at a time.
+The $i$th row is selected to maximize the magnitude of the leading element (over elements in the first column),
+which becomes the entry $u_{ii}$.
+This selection ensures that we are never forced to divide by zero during Gaussian elimination and that the magnitude
+of any element in $\B L$ is at most $1$.
+}
+
+\item {\bf A row permutation corresponds to an application of a \coloremph{row permutation matrix} $\B{P}_{jk} = \B{I} -(\B{e}_j-\B{e}_k)(\B{e}_j-\B{e}_k)^\T$:}
+
+\lgcond{
+If we permute row $i_j$ .o be the leading ($i$th) row at the $i$th step, the overall permutation matrix is given by
+\(\B P^T =\prod_{i=1}^{n-1} \B{P}_{ii_j}.\)
+}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Partial Pivoting Example}
+
+\begin{itemize}
+\item Lets consider again the matrix $\B A = \begin{bmatrix} 3 & 2 \\ 6 & 4 \\ 0 & 3\end{bmatrix}$.
+
+\lgcond{
+\begin{itemize}
+\item The largest magnitude element in the first column is $6$, so we select this as our pivot and perform the first step of LU
+\[\underbrace{\begin{bmatrix} & 1 & \\ 1 & & \\ & & 1 \end{bmatrix}}_{\B P_1} \begin{bmatrix} 6 & 4 \\ 3 & 2 \\ 0 & 3\end{bmatrix} = \begin{bmatrix} 1 \\ 1/2 \\ 0 \end{bmatrix} \begin{bmatrix} 6 & 4 \end{bmatrix} + \begin{bmatrix} 0 & 0  \\ 0 & 2 - (1/2)\cdot 4 \\ 0 & 3 - 0\cdot 4 \end{bmatrix}\]
+\item The Schur complement is $\begin{bmatrix} 0 & 3 \end{bmatrix}^T$ and we proceed with pivoted LU, %to obtain its (reduced) LU factorization, we pivot again
+\[\underbrace{\begin{bmatrix} & 1 \\ 1 & \end{bmatrix}}_{\B P_2} \begin{bmatrix} 0 \\ 3\end{bmatrix} = \begin{bmatrix} 1 \\ 0 \end{bmatrix} \begin{bmatrix} 3 \end{bmatrix} \]
+\item The overall LU factorization is then given by
+\(\B P_1 \begin{bmatrix} 1 & \\ & \B P_2 \end{bmatrix} \B A = \begin{bmatrix} 1 & \\ 0 & 1 \\ 1/2 & 0\end{bmatrix}\begin{bmatrix} 6 & 4 \\ & 3 \end{bmatrix}\)
+\end{itemize}
+}
+\lgcond{
+}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Complete Pivoting}
+
+\begin{itemize}
+\item {\bf \coloremph{Complete pivoting} permutes rows and columns to make divisor $u_{ii}$ is maximal at each step:}
+
+\lgcond{
+\begin{itemize}
+\sitem Partial pivoting ensures that the magnitude of the \coloremph{multipliers} satisfies $|\B l_{21}|= |\B a_{21}|/|u_{11}|\leq \B 1$
+\sitem Complete pivoting also gives $||\B u_{12}||_\infty\leq |u_{11}|$ and consequently $|\B l_{21}|\cdot ||\B u_{12}||_\infty = |\B a_{21}|\cdot ||\B u_{12}||_\infty/|u_{11}|\leq |\B a_{21}|$
+\sitem Complete pivoting yields a factorization of the form $\B L \B U = \B P \B A \B Q$ where $\B P$ and $\B Q$ are permutation matrices
+\end{itemize}
+}
+
+\item {\bf Complete pivoting is noticeably more expensive than partial pivoting:}
+\lgcond{
+\begin{itemize}
+\sitem Partial pivoting requires just $O(n)$ comparison operations and a row permutation
+\sitem Complete pivoting requires $O(n^2)$ comparison operations, which somewhat increases the leading order cost of LU overall
+\end{itemize}
+}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Round-off Error in LU}
+
+\begin{itemize}
+\item {\bf Lets consider factorization of $\begin{bmatrix} \epsilon & 1 \\ 1 & 1 \end{bmatrix}$ where $\epsilon<\epsilon_\text{mach}$:}
+
+\lgcond{
+\begin{itemize}
+\item Without pivoting we would compute 
+$\B L = \begin{bmatrix}1  & 0 \\ 1/\epsilon & 1 \end{bmatrix}$,
+$\B U = \begin{bmatrix}\epsilon  & 1 \\ 0 & 1-1/\epsilon \end{bmatrix}$
+\sitem Rounding yields $\fl(\B U) = \begin{bmatrix}\epsilon  & 1 \\ 0 & -1/\epsilon \end{bmatrix}$
+\sitem This leads to $\B L\fl(\B U) = \begin{bmatrix} \epsilon & 1 \\ 1 & 0 \end{bmatrix}$, a backward error of $\begin{bmatrix} 0 & 0 \\ 0 & 1 \end{bmatrix}$
+\end{itemize}
+}
+\item {\bf Permuting the rows of $\B A$ in partial pivoting gives $\B P \B A = \begin{bmatrix} 1 & 1 \\ \epsilon & 1 \end{bmatrix} $}
+\lgcond {
+\begin{itemize}
+\item We now compute
+$\B L = \begin{bmatrix}1  & 0 \\ \epsilon & 1 \end{bmatrix}$,
+$\B U = \begin{bmatrix}1  & 1 \\ 0 & 1-\epsilon \end{bmatrix}$, so $\fl(\B U)=\begin{bmatrix}1  & 1 \\ 0 & 1 \end{bmatrix}$
+\sitem This leads to $\B L\fl(\B U) = \begin{bmatrix} 1 & 1 \\ \epsilon & 1+\epsilon \end{bmatrix}$, a backward error of $\begin{bmatrix} 0 & 0 \\ 0 & \epsilon \end{bmatrix}$
+\end{itemize}
+}
+
+
+\end{itemize}
+
+\end{frame}
+
+\subsection{Error Analysis}
+
+\begin{frame}{Error Analysis of LU}
+
+\begin{itemize}
+
+\item {\bf The main source of round-off error in LU is in the computation of the Schur complement:}
+
+\lgcond{
+\begin{itemize}
+\sitem Recall that division is well-conditioned, while addition can be ill-conditioned
+\sitem After $k$ steps of LU, we are working on Schur complement $\B{A}_{22}-\B{L}_{21}\B{U}_{12}$ where $\B{A}_{22}$ is $(n-k)\times (n-k)$, $\B{L}_{21}$ and $\B{U}_{12}^T$ are $(n-k)\times k$
+\sitem Partial pivoting and complete pivoting improve stability by making sure $\B{L}_{21}\B{U}_{12}$ is small in norm
+\end{itemize}
+}
+
+\item {\bf When computed in floating point, absolute backward error $\B{\delta A}$ in LU (so $\B{\hat L}\B{\hat U}=\B{A}+\B{\delta A}$) is} $|\delta a_{ij}| \leq  \epsilon_\text{mach} (|\B{\hat L}|\cdot |\B{\hat{U}}|)_{ij}$
+
+\lgcond{
+%The major source of error is the Schur complement updates.
+For any $a_{ij}$ with $j\geq i$ (lower-triangle is similar), we compute 
+\[a_{ij}-\sum_{k=1}^i\hat{l}_{ik}\hat{u}_{kj} = a_{ij} - \langle \B{\hat{l}}_i,\B{\hat{u}}_j\rangle,\]
+which in floating point incurs round-off error at most $\epsilon_\text{mach} \langle|\B{\hat{l}}_i|,|\B{\hat{u}}_j|\rangle$.
+Using this, for complete pivoting, we can show $|\delta a_{ij}| \leq \epsilon_\text{mach} n^2||\B A||_\infty.$
+%For an arbitrary $a_{ij}$, consider the partitioning $\bmat{A}$ where $\B{A}_{11}$ is of dimension $\min(i,j)-1$. 
+%After the Schur complement update $\B{S}= \fl(\B{A}_{22}-\B{\hat L}_{21}\B{\hat U}_{12})$,
+%the entry in $\B S$ corresponding to $a_{ij}$ (an entry in $\B{A}_{22}$) will become an entry of $\B U$ or an entry of $\B{\hat L}$ (after a division that can only shrink the error).
+%Thus the $\B{\hat L}$ and $\B{\hat{U}}$ are factors of a matrix $\B{A}+\B{\delta A}$ where the perturbation is bounded by the error of the inner product necessary to compute any Schur complement entry,
+%so $|\delta a_{ij}| \leq \epsilon_\text{mach}(|\B{\hat{L}}|\cdot |\B{\hat{U}}|)_{ij}$.
+}
+
+\end{itemize}
+\end{frame}
+
+
+\section{Linear System Problem Variants}
+
+\begin{frame}{Helpful Matrix Properties}
+
+\begin{itemize}
+\item {\bf  Matrix is \coloremph{diagonally dominant}, so $\sum_{i\neq j} |a_{ij}| \leq |a_{ii}|$:}
+
+\mdcond{
+Pivoting is not required if matrix is strictly diagonally dominant $\sum_{i\neq j} |a_{ij}| < |a_{ii}|$.
+}
+\item {\bf Matrix is \coloremph{symmetric positive definite (SPD)}, so $\forall_{\B x\neq 0}, \B x^T\B A \B x>0$:}
+
+\mdcond{
+$\B L = \B U$ and pivoting is not required, \coloremph{Cholesky} algorithm $\B A = \B L \B L^T$ can be used ($\B L$ in Cholesky is not unit-diagonal).
+}
+\item {\bf Matrix is symmetric but indefinite}:
+
+\mdcond{
+Compute pivoted \coloremph{LDL factorization} $\B P \B A \B P^T = \B L \B D \B L^T$ (where $\B L$ is lower-triangular and unit-diagonal, while $\B D$ is diagonal)
+}
+\item {\bf Matrix is \coloremph{banded}, $a_{ij}= 0$ if $|i-j|>b$}:
+
+\mdcond{
+LU without pivoting and Cholesky preserve banded structure and require only $O(nb^2)$ work.
+}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Solving Many Linear Systems}
+
+\urcornerlinkdemoinclass{02-linear-systems}{Sherman-Morrison}{inclass-sherman-morrison-woodbury}{Sherman-Morrison-Woodbury Formula}
+
+\begin{itemize}
+\item {\bf Suppose we have computed $\B A = \B L \B U$ and want to solve $\B A \B X = \B B$ where $\B B$ is $n\times k$ with $k<n$:}
+
+\mdcond{
+Cost is $O(n^2k)$ for solving the $k$ independent linear systems
+}
+
+\item {\bf Supposed  we have computed $\B A = \B L \B U$ and now want to solve a perturbed system $(\B A - \B u \B v^T)\B x = \B b$:}
+
+Can use the \coloremph{Sherman-Morrison-Woodbury} formula
+\[(\B A - \B u \B v^T)^{-1} = \B A^{-1} + \frac{\B{A}^{-1}\B u\B v^T\B A^{-1}}{1- \B v^T \B{A}^{-1}\B u}\] 
+\lgcond{
+\begin{itemize}
+\item Consequently we have $\B A \B x = \B b + \frac{\B u\B v^T\B A^{-1}}{1- \B v^T \B{A}^{-1}\B u}\B b =\B b + \frac{\B v^T\B A^{-1}\B b}{1- \B v^T \B{A}^{-1}\B u}\B u  $
+\sitem Need not form $\B A^{-1}$ or $\B L^{-1}$ or $\B U^{-1}$, suffices to use backward/forward substitution to solve $\B w^T \B A = \B v^T$, i.e. solve $\B U^T \B L^T \B w = \B v$ and then solve
+\[\B L \B U \B x = \B b + \underbrace{\bigg(\frac{\B w^T\B b}{1- \B w^T \B u}\bigg)}_\text{scalar}\B u \]
+\end{itemize}
+}
+\end{itemize}
+
+\end{frame}
+
+
+%\end{document}

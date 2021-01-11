@@ -1,0 +1,603 @@
+%%\documentclass[handout]{beamer}
+%\documentclass[aspectratio=169,13pt]{beamer}
+
+%\input{./preamble}
+
+\subtitle{Boundary Value Problems for Ordinary Differential Equations}
+
+\date{}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Existence, Uniqueness, and Conditioning of ODE BVP solutions}
+
+\subsection{Problem Specification}
+
+\begin{frame}{Boundary Conditions}
+
+\begin{itemize}
+\item Often we seek to solve a differential equation that satisfies conditions on its values and derivatives on parts of the domain boundary.
+\lgcond{
+\begin{itemize}
+\item \coloremph{Dirichlet boundary conditions} specify values of $\B y(t)$ at boundary.
+\mitem \coloremph{Neumann boundary conditions} specify values of derivative $\B f(t, \B y)$ at boundary.
+\end{itemize}
+}
+
+\item Consider a first order ODE $\B y'(t)= \B f( t, \B y)$ with \coloremph{linear boundary conditions} on domain $t\in[a,b]$:
+  \[\B B_a \B y(a)+ \B B_b \B y(b) = \B c\]
+
+\lgcond{
+\begin{itemize}
+\item IVPs are a special case of Dirichlet condition with $\B B_a=\B I$, $\B B_b = \B 0$.
+\mitem Conditions are \coloremph{separated} if they do not couple different boundary points, i.e., for all $i$, the $i$th row of either $\B B_a$ or $\B B_b$ is zero.
+\mitem Higher-order boundary conditions can be reduced to linear boundary conditions in the same way as a nonlinear ODE is reduced to a linear ODE.
+\end{itemize}
+}
+\end{itemize}
+\end{frame}
+
+\subsection{Existence of Solutions}
+
+\begin{frame}{Existence of Solutions for Linear ODE BVPs}
+
+\begin{itemize}
+\item The solutions of linear ODE BVP $\B y'(t) = \B A(t)\B y(t) + \B b(t)$ are linear combinations of solutions to linear homogeneous ODE IVPs $\B y'(t) = \B A(t) \B y(t)$:
+
+\lgcond{
+\begin{itemize}
+\item
+%Let the $i$th column of $\B Y(t)$ be 
+Let the solutions $\B y_i(t)$ to the homogeneous ODE, $\B y_i'(t) = \B A(t)\B y_i(t)$, with initial conditions $\B y_i(a)=\B e_i$ be columns of
+\vspace*{-.05in}
+\[\B Y(t) = \begin{bmatrix} \B y_1(t) & \cdots & \B y_n(t)\end{bmatrix}  = \B I + \int_{a}^t \B A(s) \B Y(s) ds.\]
+\item
+The ODE BVP solutions are then given by $\B y(t) = \B Y(t)\B u(t)$ for some $\B u(t)$, with
+\begin{align*}
+\B y'(t) = \B A(t)\B y(t) + \B b(t) \quad \Rightarrow & \quad
+\B Y'(t)\B u(t) + \B Y(t) \B u'(t) = \B A(t)\B Y(t)\B u(t) + \B b(t), \\
+\B Y'(t) = \B A(t) \B Y(t) \quad \Rightarrow & \quad
+%\item $\B Y(t)$ satisfies $\B Y'(t) = \B A(t)\B Y(t)$, therefore, the derivative of $\B u(t)$ is
+\B u'(t) = \B Y(t)^{-1}\B b(t).
+\end{align*}
+\end{itemize}
+}
+\item
+%\[\B Y_a(t) = \B I + \int_{a}^t \B A(s) \B Y_a(s) ds.\]
+%The boundary condition at $a$ implies that the solutions satisfy $\B u(a)=\B Y^{-1}(a)\B y(a)$:
+%The boundary conditions entail the existence of a solution $u(t)$:
+Solution $\B u(t)$ (and $\B y(t)$) exists if $\B Q = \B B_a  \B Y(a)+ \B B_b \B Y(b)$ is invertible:
+\lgcond{
+\begin{align*}
+%\B B_a \B y(a)+ \B B_b \B y(b) &= \B c \\
+\B B_a  \B Y(a)\B u(a)&+ \B B_b \B Y(b)\Big(\B u(a) + \int_{a}^b \B u'(s) ds\Big)= \B c, \\
+\B u(a) &= \Big(\underbrace{\B B_a  \B Y(a)+ \B B_b \B Y(b)}_{\B Q}\Big)^{-1}\Big(\B c - \B B_b  \B Y(b)\int_{a}^b \B u'(s) ds\Big).
+\end{align*}
+}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Green's Function Form of Solution for Linear ODE BVPs}
+
+\begin{itemize}
+%\item We can ascertain how the linear combinations of homogeneous solutions change ($\B u'(t)$) from the ODE:
+%% to specify $\B y(t)=\B Y(t)\B u(t)$:
+%%Can derive the solutions to a linear ODE BVP $\B y'(t) = \B A(t)\B y(t) + \B b(t)$ from solutions to homogeneous linear ODE $\B y' = \B A(t) \B y(t)$ IVPs:
+%
+%\lgcond{
+%\begin{itemize}
+%\item Substituting into the diffential equation $\B y'(t) = \B A(t)\B y(t) + \B b(t)$ we obtain
+%\[\B Y'(t)\B u(t) + \B Y(t) \B u'(t) = \B A(t)\B Y(t)\B u(t) + \B b(t).\]
+%\item $\B Y(t)$ satisfies $\B Y'(t) = \B A(t)\B Y(t)$, therefore, we obtain the form,
+%\[\B u'(t) = \B Y(t)^{-1}\B b(t).\]
+%\end{itemize}
+%}
+\item For any given $\B b(t)$ and $\B c$, the solution to the BVP can be written in the form:
+\[\B y(t) = \B \Phi(t) \B c + \int_a^b \B G(t,s)\B b(s) ds\]
+$\B \Phi(t) = \B Y(t) \B Q^{-1}$ is the \coloremph{fundamental matrix} and the \coloremph{Green's function} is
+\[\B G(t,s) = \B Y(t) \B Q^{-1}\B I(s) \B Y^{-1}(s), \quad \B I(s) = \begin{cases}  \B B_a\B Y(a) &: s<t \\-\B B_b\B Y(b) & : s\geq t\end{cases}\]
+\lgcond{
+\begin{itemize}
+\item From our expression for $\B u(a)$ and the integral equation for $\B y(t)$,
+\begin{align*}
+\B y(t) %&= \B Y(t)\Big(\B u(a) + \int_a^t\B u'(s) ds\Big) \\
+&=\B Y(t) \B Q^{-1}\bigg(\B c -\B B_b \B Y(b)\int_a^b\B u'(s)ds\bigg) + \B Y(t) \int_a^t \B u'(s) ds \\
+&=\B \Phi(t) \B c + \B Y(t) \B Q^{-1}\bigg(-\B B_b \B Y(b)\int_a^b\B u'(s)ds + \B Q \int_a^t \B u'(s) ds\bigg) \\
+&=\B \Phi(t) \B c + \B Y(t) \B Q^{-1}\bigg(\B B_a \B Y(a)\int_a^t\B Y^{-1}(s)\B b(s) ds - \B B_b \B Y(b) \int_t^b \B Y^{-1}(s)\B b(s) \bigg).
+\end{align*}
+\end{itemize}
+}
+\lgcond{}
+
+\end{itemize}
+\end{frame}
+
+
+%\begin{frame}{Green's Function Form of Solution}
+%
+%\begin{itemize}
+%\item For any given $\B b(t)$ and $\B c$, the solution to the BVP can be written in the form:
+%\[\B y(t) = \B \Phi(t) \B c + \int_a^b \B G(t,s)\B b(s) ds\]
+%$\B \Phi(t) = \B Y(t) \B Q^{-1}$ is the \coloremph{fundamental matrix} and the Green's function is
+%\[\B G(t,s) = \B Y(t) \B Q^{-1}\B I(s) \B Y^{-1}(s), \quad \B I(s) = \begin{cases}  \B B_a\B Y(a)& : s<t \\\B B_b\B Y(b) & : s\geq t\end{cases}\]
+%%\item We can ascertain how the linear combinations of homogeneous solutions change ($\B u'(t)$) from the ODE:
+%%% to specify $\B y(t)=\B Y(t)\B u(t)$:
+%%%Can derive the solutions to a linear ODE BVP $\B y'(t) = \B A(t)\B y(t) + \B b(t)$ from solutions to homogeneous linear ODE $\B y' = \B A(t) \B y(t)$ IVPs:
+%%
+%%\lgcond{
+%%\begin{itemize}
+%%\item Substituting into the diffential equation $\B y'(t) = \B A(t)\B y(t) + \B b(t)$ we obtain
+%%\[\B Y'(t)\B u(t) + \B Y(t) \B u'(t) = \B A(t)\B Y(t)\B u(t) + \B b(t).\]
+%%\item $\B Y(t)$ satisfies $\B Y'(t) = \B A(t)\B Y(t)$, therefore, we obtain the form,
+%%\[\B u'(t) = \B Y(t)^{-1}\B b(t).\]
+%%\end{itemize}
+%%}
+%%\item From the integral equation $\B u(t) = \B u(a) + \int_a^t\B Y^{-1}(s)\B b(s) ds$, we obtain $\B y(t)$,
+%\lgcond{
+%\begin{align*}
+%\B y(t) &= \B Y(t)\bigg(\B u(a) + \int_a^t\B Y^{-1}(s)\B b(s) ds\bigg) \\
+%&=\B Y(t) \underbrace{\B Q^{-1}\bigg(\B c -\B B_b \B Y(b)\int_a^b\underbrace{\B Y^{-1}(s)\B b(s)}_{\B u'(s)}ds\bigg)}_{\B u(a)} + \B Y(t) \int_a^t \underbrace{\B Y^{-1}(s) \B b(s)}_{\B u'(s)} ds
+%\end{align*}
+%}
+%
+%\end{itemize}
+%\end{frame}
+
+%\begin{frame}{Linear ODE BVP Green's Function}
+%
+%\begin{itemize}
+%
+%\item We now express our solution (with form $\B y(t) = \B Y(t)(\B u(a) + \int_a^t \B u'(s) ds)$) in the form $\B y(t) = \B s(t) + \int_a^b \B G(t,s) \B b(s) ds$ where $\B G$ is the \coloremph{Green's function}:
+%
+%\lgcond{
+%Using the fact that,
+%\begin{align*}
+%\B Y(t) \B Q^{-1}\underbrace{(\B B_a \B Y(a)+\B B_b \B Y(b))}_{\B Q}\int_a^t\B Y^{-1}(s)\B b(s)ds =  \B Y(t)\int_a^t \B Y^{-1}(s) \B b(s) ds,
+%\end{align*}
+%we can express our previous solution in the form,
+%\begin{align*}
+%\B y(t) = \B Y(t) \B Q^{-1}\bigg(\B c + \B B_a \B Y(a)\int_a^t\B Y^{-1}(s)\B b(s)ds-\B B_b \B Y(b)\int_t^b\B Y^{-1}(s)\B b(s)ds\bigg),
+%\end{align*}
+%which allows us to derive the Green's function,
+%\[\B G(t,s) = \B Y(t) \B Q^{-1}\B I(s) \B Y^{-1}(s), \quad \B I(s) = \begin{cases}  \B B_a\B Y(a)& : s<t \\\B B_b\B Y(b) & : s\geq t\end{cases}\]
+%}
+%\lgcond{}
+%\end{itemize}
+%\end{frame}
+
+
+
+\subsection{Conditioning of Solutions}
+
+\begin{frame}{Conditioning of Linear ODE BVPs}
+
+\begin{itemize}
+\item For any given $\B b(t)$ and $\B c$, the solution to the BVP can be written in the form:
+\[\B y(t) = \B \Phi(t) \B c + \int_a^b \B G(t,s)\B b(s) ds\]
+
+\lgcond{
+$\B \Phi(t) = \B Y(t) \B Q^{-1}$ is the fundamental matrix, which like the Green's function is associated with the homogeneous ODE as well as its linear boundary condition matrices $\B B_a$ and $\B B_b$, but is independent $\B b(t)$ and $\B c$.
+}
+\item The absolute condition number of the BVP is $\kappa = \max\{||\B \Phi||_\infty,||\B G||_\infty\}$:
+
+\lgcond{
+This sensitivity measure enables us to bound the perturbation $||\B{\hat{y}}-\B{y}||_\infty$ with respect to the magnitude of a perturbation to $\B b(t)$ or $\B c$.
+}
+
+\end{itemize}
+\end{frame}
+
+\section{Algorithms for ODE BVPs}
+
+\subsection{Shooting and Multiple Shooting Methods}
+
+\begin{frame}{Shooting Method for ODE BVPs}
+
+\urcornerlinkdemo{10-boundary-value-problems}{Shooting method}
+
+\begin{itemize}
+\item For linear ODEs, we construct solutions from IVP solutions in $\B Y(t)$, which suggests the \coloremph{shooting method} for solving BVPs by reduction to IVPs:
+
+\tlgcond{
+\smallskip
+%The \coloremph{shooting} method iteratively 
+%Guess initial condition $\B{\hat{y}}^{(1)}(a)$ and 
+For $k=1,2,\ldots$ repeat until convergence:
+\begin{enumerate}
+\item 
+construct approximate initial value guesses $\B{\hat{y}}^{(k)}(a) \approx \B y(a)$,
+\item solve the resulting IVP,
+\item check the quality of the solution at the new boundary,
+\[||\B B_b\B{\hat{y}}^{(k)}(b) - \B B_a\B{\hat{y}}^{(k)}(a) - \B c||,\]
+\item pick the initial conditions for the next shot, $\B{\hat{y}}^{(k+1)}(a)$ by treating $\B{\hat{y}}^{(l)}(a)$ for $l=1,\ldots,k$ as guesses $\B x^{(1)},\ldots, \B x^{(k)}$ to root finding procedure for
+%can be constructed by a 1D root finding technique on
+\[\B h(\B x) = \B B_a \B x + \B B_b \B y_{\B x}(b) - \B c, \ \text{where}\ \B y_{\B x}(b)  \ \text{is the IVP solution with $\B y_{\B x}(a)=\B x$}.\]
+\end{enumerate}
+}
+\item \coloremph{Multiple shooting} employs the shooting method over subdomains:
+
+\lgcond{
+\begin{itemize}
+\item
+The shooting problems on subdomains are interdependent, as they must satisfy continuity conditions on boundaries between them, leading to a system of nonlinear equations.
+\mitem
+Improves on conditioning of shooting method, which can suffer from ill-conditioning of large IVPs.
+\end{itemize}
+}
+
+\end{itemize}
+\end{frame}
+
+\subsection{Finite Differences}
+
+\begin{frame}{Finite Difference Methods}
+
+\begin{itemize}
+\item Rather than solve a sequence of IVPs that satisfy the ODEs until they (approximately) satisfy boundary conditions, we can refine an approximation that satisfies the boundary conditions, until it satisfies the ODE:
+
+\lgcond{
+\begin{itemize}
+\item
+\coloremph{Finite difference methods} work by obtaining a solution on points $t_1,\ldots, t_n$, so that $\B{\hat{y}}_k \approx \B y(t_k)$ by finite-difference formulae, for example,
+\begin{align*}
+\B f(t,\B y)=\B y'(t)\approx \frac{\B y(t+h) - \B y(t-h)}{2h} \Rightarrow \B f(t_k, \B{\hat{y}}_k) = \frac{\B{\hat{y}}_{k+1} - \B{\hat{y}}_{k-1}}{t_{k+1}-t_{k-1}}.
+\end{align*}
+\item
+The resulting system of equations can be solved by standard methods and is linear if $\B f$ is linear.
+\end{itemize}
+}
+
+\item Convergence to solution is obtained with decreasing step size $h$ so long as the method is consistent and stable:
+
+\lgcond{
+\begin{itemize}
+\item 
+Consistency implies that the truncation error goes to zero.
+\mitem 
+Stability ensures input perturbations have bounded effect on solution.
+\end{itemize}
+}
+\end{itemize}
+\end{frame}
+
+%\begin{frame}{Collocation Methods}
+%
+%\begin{itemize}
+%\item \coloremph{Collocation methods} approximate $\B y$ by representing it in a basis
+%\[\B y(t) = \B v(t,\B x) = \sum_{i=1}^n x_i\B \phi_i(t)\]
+%\tlgcond{
+%To construct equations, consider approximation for a set of collocation points $t_1,\ldots, t_n$ with $t_1=a$ and $t_n=b$
+%\[\forall_i \B v(t_i, \B x) = \B f(t_i,\B v(t_i, \B x))\]
+%}
+%\item \coloremph{Spectral methods} let each $\B \phi_i$ (e.g. polynomial or trigonometric function) be nonzero over most of $[a,b]$, while \coloremph{finite element} methods leverage basis functions with local support (e.g. B-splines).
+%
+%\lgcond{
+%Trigonometric functions and polynomials are typically eigenfunctions of differential operators, hence the name ``spectral methods''.
+%}
+%
+%\end{itemize}
+%\end{frame}
+%
+%
+%\begin{frame}{Solving BVPs by Optimization}
+%
+%\begin{itemize}
+%\item We reformulate the collocation approximation as an optimization problem:
+%
+%\tlgcond{
+%Consider the simplified scenario $\B f(t,y)=\B f(t)$ with residual equation,
+%\[\B r(t, \B x) = \B v'(t, \B x) - \B f(t) = \sum_{j=1}^n x_j \B \phi'_j(t) - \B f(t)\]
+%and minimize it using the objective function,
+%\[F(\B x) = \frac{1}{2} \int_a^b \B r(t,\B x)^2 dt = \int_a^b \B r(t,\B x)\phi_i(t).\]
+%}
+%\item The first-order optimality conditions of the optimization problem, yields a system of linear equations $\B A\B x = \B b$:
+%\tlgcond{
+%\begin{align*}
+%\B 0 = \frac{d\B F}{d x_i} &= \int_a^b \B r(t, \B x) \frac{dr}{dx_i} dt = \int_a^b \B r(t, \B x) \B \phi_i'(t) dt \\
+% &=\sum_{j=1}^n  x_j\underbrace{\int_a^b \B \phi'_j(t)^T\B \phi_i'(t) dt}_{a_{ij}} - \underbrace{\int_a^bf(t) \B \phi_i'(t) dt}_{b_i}
+%\end{align*}
+%}
+%
+%
+%\end{itemize}
+%\end{frame}
+%
+%\begin{frame}{Weighted Residual}
+%
+%\begin{itemize}
+%\item \coloremph{Weighted residual methods} work by ensuring the residual is orthogonal with respect to a given set of weight functions:
+%
+%\tlgcond{
+%Rather than setting components of the gradient to zero, we instead have,
+%\[\int_a^b r(t,\B x)w_i(t) dt = 0, \forall i \in \{1,\ldots, n\},\]
+%which again yields a system of equations of the form $\B A \B x = \B b$ where
+%\[a_{ij} = \int_a^b \phi_j'(t) w_i(t), \quad b_i=\int_a^b f(t) w_i(t).\]
+%The collocation method is a weighted residual method where $w_i(t)=\delta(t_i)$.
+%}
+%\item The Galerkin method is a weighted residual method where $w_i=\phi_i$.
+%
+%\lgcond{
+%For a first-order differential equation, this is equivalent to setting $w_i = \frac{dr}{dx_i}$, so we obtain a linear system with the \coloremph{stiffness matrix} $\B A$ and \coloremph{load vector} $\B b$ defined as before,
+%\( \B 0 =\sum_{j=1}^n  x_j\underbrace{\int_a^b \B \phi'_j(t)^T\B \phi_i'(t) dt}_{a_{ij}} - \underbrace{\int_a^bf(t) \B \phi_i'(t) dt}_{b_i}.\)
+%}
+%
+%
+%\end{itemize}
+%\end{frame}
+
+
+
+%\end{document}
+
+
+\begin{frame}{Finite Difference Methods}
+
+\urcornerlinkdemo{10-boundary-value-problems}{Finite differences}
+
+\begin{itemize}
+\item Lets derive the finite difference method for the ODE BVP defined by
+
+\[u''+7(1+t^2)u=0\]
+with boundary conditions $u(-1)=3$ and $u(1)=-3$, 
+using a centered difference approximation for $u''$ on $t_1,\ldots, t_n$, $t_{i+1}-t_i=h$.
+
+\lgcond{
+\begin{itemize}
+\item We have equations $u(-1)=u(t_1)=u_1=3$, $u(1)=u(t_n)=u_n=3$ and $n-2$ finite difference equations, one for each $i\in\{2,\ldots,n-1\}$,
+\[\frac{u_{i+1} - 2u_i + u_{i-1}}{h^2} + 7(1+t_i^2)u_i = 0.\]
+\item These correspond to a linear system based on matrices:
+{\tiny
+\[\B A = \begin{bmatrix} 1 & & & & \\ 1/h^2 & -2/h^2 & 1/h^2 & & \\ & \ddots & \ddots & \ddots & \\ & & 1/h^2 & -2/h^2 & 1/h^2 \\ & & & & 1 \end{bmatrix} \quad \text{and} \quad
+\B B = \begin{bmatrix} 0 & & & & \\ 0 & 7(1+t_2^2) & & & \\ &  & \ddots & \\ & & & 7(1+t_{n-1}^2) & 0 \\ & & & & 0\end{bmatrix},\]
+}
+where $(\B A +\B B) \B u = \begin{bmatrix} 3 & 0 & \cdots 0 & -3\end{bmatrix}^T$.
+\end{itemize}
+}
+\lgcond{}
+\end{itemize}
+\end{frame}
+
+\subsection{Collocation}
+
+\begin{frame}{Collocation Methods}
+
+\urcornerlinkdemo{10-boundary-value-problems}{Sparse matrices}
+
+\begin{itemize}
+\item \coloremph{Collocation methods} approximate $\B y$ by representing it in a basis
+\[\B y(t) \approx \B v(t,\B x) = \sum_{i=1}^n x_i\B \phi_i(t).\]
+
+\tlgcond{
+\begin{itemize}
+\item
+Seek to satisfy for collocation points $t_1,\ldots, t_n$ with $t_1=a$ and $t_n=b$,
+\[ \forall_{i\in\{2,\ldots,n-1\}}\quad \B v'(t_i, \B x) = \B f(t_i,\B v(t_i, \B x)).\]
+\item
+Two more equations typically obtained from boundary conditions at $t_1,t_n$.
+\end{itemize}
+}
+\item Choices of basis functions give different families of methods:
+
+\lgcond{
+\begin{itemize}
+\item \coloremph{Spectral methods} use polynomials or trigonometric functions for $\B \phi_i$, which are nonzero over most of $[a,b]$, and  have the advantage of corresponding to eigenfunctions of differential operators.
+\mitem \coloremph{Finite element} methods leverage basis functions with local support (e.g. B-splines) and yield sparsity in the resulting problem since many pairs of basis functions have disjoint support.
+\end{itemize}
+}
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Solving BVPs by Optimization}
+
+\begin{itemize}
+%\item We reformulate the collocation approximation as an optimization problem:
+\item To improve robustness, define and minimize a residual error over the whole domain rather than at collocation points. 
+\tlgcond{
+\begin{itemize}
+\item
+For simplified scenario $\B f(t,y)=\B f(t)$,
+\[\B r(t, \B x) = \B v'(t, \B x) - \B f(t) = \sum_{j=1}^n x_j \B \phi'_j(t) - \B f(t).\]
+\item
+In particular, we seek to minimize the objective function,
+\[F(\B x) = \frac{1}{2} \int_a^b ||\B r(t,\B x)||_2^2 dt .\]%= \int_a^b \B r(t,\B x)^T\B \phi_i(t) dt
+\end{itemize}
+}
+\item The first-order optimality conditions of the optimization problem are a system of linear equations $\B A\B x = \B b$:
+\vspace*{-.05in}
+\tlgcond{
+\begin{align*}
+\B 0 = \frac{dF}{d x_i} &= \int_a^b \B r(t, \B x)^T \frac{d\B r}{dx_i} dt = \int_a^b \B r(t, \B x)^T \B \phi_i'(t) dt \\
+ &=\sum_{j=1}^n  x_j\underbrace{\int_a^b \B \phi'_j(t)^T\B \phi_i'(t) dt}_{a_{ij}} - \underbrace{\int_a^b\B f(t)^T \B \phi_i'(t) dt}_{b_i}
+\end{align*}
+}
+
+
+\end{itemize}
+\end{frame}
+
+\subsection{Finite Element Methods}
+
+\begin{frame}{Weighted Residual}
+
+\begin{itemize}
+\item \coloremph{Weighted residual methods} work by ensuring the residual is orthogonal with respect to a given set of weight functions:
+
+\tlgcond{
+\begin{itemize}
+\item
+Rather than setting components of the gradient to zero, we instead have
+\[\int_a^b \B r(t,\B x)^T\B w_i(t) dt = 0, \forall i \in \{1,\ldots, n\}.\]
+\item
+Again, we obtain a system of equations of the form $\B A \B x = \B b$, where
+\[a_{ij} = \int_a^b \B \phi_j'(t)^T \B w_i(t), \quad b_i=\int_a^b \B f(t)^T \B w_i(t).\]
+\item
+The collocation method is a weighted residual method where $\B w_i(t)=\B \delta(t-t_i)$.
+\end{itemize}
+}
+\item The Galerkin method is a weighted residual method where $\B w_i=\B \phi_i$.
+
+\lgcond{
+%For a first-order differential equation $\B y'(t)=\B f(t)$, this is equivalent to setting $\B w_i = \frac{d\B r}{dx_i}$, so 
+Linear system with the \coloremph{stiffness matrix} $\B A$ and \coloremph{load vector} $\B b$ is
+\[ \B 0 =\sum_{j=1}^n  x_j\underbrace{\int_a^b \B \phi'_j(t)^T\B \phi_i(t) dt}_{a_{ij}} - \underbrace{\int_a^b \B f(t)^T \B \phi_i(t) dt}_{b_i}.\]
+}
+
+
+\end{itemize}
+\end{frame}
+
+
+%\begin{frame}{Linear BVPs by Optimization}
+%
+%\begin{itemize}
+%\item Lets apply the Galerkin method to the more general linear ODE $\B f(t,y)=\B A(t) \B y(t) + \B b(t)$ with residual equation,
+%
+%\tlgcond{
+%First, choose basis functions $\{\B \phi_i\}_{i=1}^n$ to satisfy the boundary conditions, so solution automatically satisfies them, then minimize the residual,
+%\[\B r = \B v'- \B A \B v - \B b, \ \ \text{so that}\ \  \B r(t,\B x) = \sum_{j=1}^n x_j (\B \phi'_j(t) - \B A(t)\B \phi_j(t)) - \B b(t).\]
+%%and minimize it using the objective function,
+%%\[F(\B x) = \frac{1}{2} \int_a^b \B r(t,\B x)^2 dt = \int_a^b \B r(t,\B x)\phi_i(t) dt.\]
+%%}
+%%\item The first-order optimality conditions of the optimization problem, yields a system of linear equations $\B A\B x = \B b$:
+%%\tlgcond{
+%%\begin{align*}
+%%\B 0 = \frac{d\B F}{d x_i} &= \int_a^b \B r(t, \B x)^T \frac{d\B r}{dx_i} dt = \int_a^b \B r(t, \B x)^T \B \psi_i(t) dt \\
+%% &=\sum_{j=1}^n  x_j\int_a^b \B \psi_j(t)^T\B \psi_i(t) dt - \int_a^b\B b(t) \B \phi_i'(t) dt
+%%\end{align*}
+%The Galerkin method, minimizes the residual by orthogonality with respect to a set of test functions that is the same as the set of basis functions,
+%\begin{align*}
+%\B 0  &= \int_a^b \B r(t, \B x)^T \B \phi_i(t) dt   \\
+% &=\sum_{j=1}^n  x_j\int_a^b (\B \phi'_j(t) - \B A(t)\B \phi_j(t))^T\B \phi_i(t) dt - \int_a^b\B b(t)^T \B \phi_i(t) dt
+%\end{align*}
+%}
+%\lgcond{}
+%
+%
+%\end{itemize}
+%\end{frame}
+
+
+\begin{frame}{Second-Order BVPs: Poisson Equation}
+
+In practice, BVPs are at least second order and its advantageous to work in the natural set of variables.
+\begin{itemize}
+\item Consider the \coloremph{Poisson equation} $u''=f(t)$ with boundary conditions $u(a)=u(b)=0$ and define a localized basis of hat functions:
+\lgcond{
+\[%\forall i \in \{1,n\} , \quad 
+\phi_i(t) = \begin{cases} (t-t_{i-1})/h &: t \in [t_{i-1},t_i] \\ (t_{i+1}-t)/h &: t\in [t_{i},t_{i+1}] \\ 0 &: \text{otherwise} \end{cases}\]
+for $i\in \{1,\ldots, n\}$, handling boundaries via $t_0=t_1=a$ and $t_{n+1}=t_n=b$.
+}
+\item
+Defining residual equation by analogy to the first order case, we obtain,
+\tlgcond{
+\[r =  v'' -  f, \ \ \text{so that}\ \   r(t,\B x) = \sum_{j=1}^n x_j  \phi''_j(t) -  f(t).\]
+However, with our choice of basis, $\B \phi''_j(t)$ is undefined, since $\B \phi'_j(t)$ is discontinuous at $t_{j-1},t_j,t_{j+1}$.
+}
+
+\end{itemize}
+\end{frame}
+
+\subsection{Weak Form of ODEs}
+\begin{frame}{Weak Form and the Finite Element Method}
+
+\begin{itemize}
+
+\item The finite-element method permits a lesser degree of differentiability of basis functions by casting the ODE in \coloremph{weak form}:
+
+\tlgcond{
+\begin{itemize}
+\item For any solution $u$, if test function $\phi_i$ satisfies the boundary conditions, the ODE satisfies the weak form,
+\begin{align*}
+\int_a^b f(t) \phi_i(t) dt &=\int_a^b u''(t) \phi_i(t) dt 
+=u'(b) \underbrace{\phi_i(b)}_0 - u'(a) \underbrace{\phi_i(a)}_0 - \int_a^b u'(t) \phi_i'(t) dt \\
+&=  - \int_a^b u'(t) \phi_i'(t) dt.
+\end{align*}
+\item Note that the final equation contains no second derivatives, and subsequently we can form the linear system $\B A \B x = \B b$ with
+\[a_{ij} = - \int_a^b \phi_j'(t) \phi_i'(t) dt, \quad b_i= \int_a^b f(t) \phi_i(t) dt.\] 
+\item The finite element method thus searches the larger (once-differentiable) function space to find a solution $u$ that is in a (twice-differentiable) subspace.
+\end{itemize}
+}
+\lgcond{}
+
+
+\end{itemize}
+\end{frame}
+
+%\begin{frame}{Finite Element Methods in Practice}
+%
+%\begin{itemize}
+%\item Hat functions are linear instances of \coloremph{B-splines}:
+%
+%\lgcond{
+%B-splines of degree $k$ are $k$-times differentiable.
+%For higher-order ODEs or high-order convergence with $h$, its necessary to use $k>1$.
+%}
+%
+%\item Finite-element methods readily generalize to PDEs:
+%
+%\lgcond{
+%In its most basic form each element corresponds to a triangle (2D) or quadrilateral (3D).
+%}
+%
+%\end{itemize}
+%
+%\end{frame}
+
+\section{Eigenvalue Problems for ODEs}
+
+\begin{frame}{Eigenvalue Problems with ODEs}
+
+\begin{itemize}
+\item A typical second-order scalar \coloremph{ODE BVP eigenvalue problem} is
+\[u'' = \lambda f(t,u,u'), \quad \text{with boundary conditions } \  u(a)=0, u(b)=0.\]
+These can be solved, e.g. for $f(t,u,u')=g(t)u$ by finite differences:
+
+\lgcond{
+%Lets first consider $f(t,u,u')=g(t)u$, in which case we 
+\begin{itemize}
+\item Approximating the solution at a set of points $t_1,\ldots, t_n$ using finite differences,
+\[\frac{y_{i+1}-2y_i+y_{i-1}}{h^2} = \lambda g_iy_i.\]
+\item This yields a tridiagonal matrix eigenvalue problem $\B A \B y =\lambda \B y$ where
+\[\frac{y_{i+1}-2y_i+y_{i-1}}{g_ih^2} = \lambda y_i.\]
+\end{itemize}
+}
+\lgcond{}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Using Generalized Matrix Eigenvalue Problems}
+
+\begin{itemize}
+\item Generalized matrix eigenvalue problems arise from more sophisticated ODEs,
+\[u'' = \lambda (g(t)u + h(t)u'), \quad \text{with boundary conditions } \  u(a)=0, u(b)=0.\]
+
+\lgcond{
+\begin{itemize}
+\item
+Again approximate each of the derivatives at a set of points $t_1,\ldots, t_n$ using finite differences,
+\[\frac{y_{i+1}-2y_i+y_{i-1}}{h^2} = \lambda \bigg(g_i+ \frac{y_{i+1}-y_{i-1}}{2h}\bigg)y_i.\]
+\item
+These corresponds to a generalized matrix eigenvalue problem 
+\[\B A \B y =\lambda \B B \B y,\]
+where both $\B A$ and $\B B$ are tridiagonal.
+\mitem
+Specialized methods exist for solving generalized matrix eigenvalue problems (also referred to as matrix pencil eigenvalue problems).
+\end{itemize}
+}
+\lgcond{}
+\end{itemize}
+
+\end{frame}
+
+
+
+
+
+
+%\end{document}

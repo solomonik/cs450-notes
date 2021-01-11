@@ -1,0 +1,670 @@
+%%\documentclass[handout]{beamer}
+%\documentclass[aspectratio=169,13pt]{beamer}
+
+%\input{./preamble}
+
+\subtitle{Numerical Integration and Differentiation}
+
+\date{}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Introduction to Numerical Integration}
+
+\begin{frame}{Integrability and Sensitivity}
+
+\begin{itemize}
+
+\item Seek to compute $\mathcal{I}(f)=\int_{a}^b f(x) dx$:
+
+\mdcond{
+\begin{itemize}
+\item $f$ is integrable if continuous and bounded.
+\mitem Finite number of discontinuities is also often permissible.
+\end{itemize}
+}
+
+\item The condition number of integration is bounded by the distance $b-a$:
+
+\lgcond{
+Suppose the input function is perturbed $\hat{f}=f+ \delta f$, then
+\begin{align*}
+\delta I &=  |\mathcal{I}(\hat{f}) - \mathcal{I}(f)| \\
+               &\leq |\mathcal{I}(\delta f)| \\
+               &\leq (b-a) ||\delta f||_\infty, \quad \text{where} \quad |f||_\infty = \max_{x\in[a,b]} | f(x)|.
+%\left|\int_{a}^b \hat{f}(x) dx - \int^b_a f(x) dx\right| \\
+%               &\leq |\int_{a}^b \underbrace{|\hat{f}(x) dx - \int^b_a f(x)|}_{\leq||\hat{f}-f||_\infty = \delta f}dx \\
+%               &\leq (b-a) \delta f
+\end{align*}
+Note that this result {\it does not depend on the magnitude of $f$ or its derivatives}, which means integration is generally very well-conditioned, which makes sense since integration corresponds to averaging.
+}
+
+\end{itemize}
+
+\end{frame}
+
+\section{Quadrature Rules}
+
+\begin{frame}{Quadrature Rules}
+
+\begin{itemize}
+
+\item Approximate the integral $\mathcal{I}(f)$ by a weighted sum of function values:
+\lgcond{
+\[\mathcal{I}(f) \approx Q_n(f)= \sum_{i=1}^n w_i f(x_i)\]
+\begin{itemize}
+\item $\{x_i\}_{i=1}^n$ are quadrature \coloremph{nodes} or \coloremph{abscissas},
+%\item
+ $\{w_i\}_{i=1}^n$ are quadrature \coloremph{weights}.
+\mitem Quadrature rule %defined by $(\{x_i\}_{i=1}^n,\{w_i\}_{i=1}^n)$ 
+is \coloremph{closed} if $x_1=a,x_n=b$ and \coloremph{open} otherwise.
+\mitem Rule is \coloremph{progressive} if nodes of $Q_n$ are a subset of those of $Q_{n+1}$.
+\end{itemize}
+}
+
+\sitem For a fixed set of $n$ nodes, polynomial interpolation followed by integration give \coloremph{$(n-1)$-degree quadrature rule}:
+
+\lgcond{
+\begin{itemize}
+\item Accuracy depends on interpolant, is exact for all $(n-1)$-degree polynomials.
+\mitem Can obtain weights by expressing the unique $(n-1)$-degree polynomial interpolant in the Lagrange basis 
+$p(x)=\sum_{i=1}^{n} \phi_i(x)f(x_i)$, so that
+%, the coefficients are then % of $f$ is given by the Vandermonde system,
+%\[\B y = \B y, \quad \text{where} \quad y_i= f(x_i) \quad \text{and} \quad d_{ii}=\phi_i(x_i).\] 
+%The quadrature rule is defined by 
+\[Q_n(f)=\mathcal{I}(p)= \sum_{i=1}^{n} \underbrace{\mathcal{I}(\phi_i)}_{w_i}f(x_i).\]
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Determining Weights in a General Basis}
+
+\begin{itemize}
+\item A quadrature rule provides $\B x$ and $\B w$ so as to approximate 
+\lgcond{
+  \[\mathcal{I}(f)\approx Q_n(f)=\langle \B w, \B y \rangle, \quad \text{where} \quad y_i=f(x_i)\]
+$Q_n$ is the integral of the polynomial interpolant $p$ of $(x_1,y_1),\ldots,(x_n,y_n)$.
+%\begin{itemize}
+%\item 
+%\end{itemize}
+}
+\item \coloremph{Method of undetermined coefficients} obtains $\B y$ from \coloremph{moment equations} based on Vandermonde system:
+\lgcond{
+\[ 
+\mathcal{I}(p) = \mathcal{I}(\langle \{\phi_i(x)\}_{i=1}^n, \underbrace{\B V(\B x, \{\phi_i\}_{i=1}^n)^{-1} \B y}_\text{interpolant coefficients}\rangle) =
+ \langle \underbrace{\B V(\B x, \{\phi_i\}_{i=1}^n)^{-T}\{\mathcal{I}(\phi_i(x))\}_{i=1}^n}_{\B w}, \B y\rangle\]
+%\begin{bmatrix} \int_a^b \phi_1(x) dx & \cdots &\int_a^b \phi_n(x)dx \end{bmatrix} \B V(\B x, \{\phi_i\}_{i=1}^n)^{-1} \B y.\]
+%\begin{bmatrix} \int_a^b \phi_1(x) dx & \cdots &\int_a^b \phi_n(x)dx \end{bmatrix} \B V(\B x, \{\phi_i\}_{i=1}^n)^{-1} \B y.\]
+\begin{itemize}
+\item Thus to obtain $\B w$, we need to solve the linear system,
+\[\B V(\B x, \{\phi_i\}_{i=1}^n)^T\B w = \begin{bmatrix} \int_a^b \phi_1(x) dx & \cdots &\int_a^b \phi_n(x)dx \end{bmatrix}^T,\]
+\item Note that the weights $\B w$ are \coloremph{independent} of the function values $\B y$.
+\end{itemize}
+}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Newton-Cotes Quadrature}
+\urcornerlinkdemo{08-quadrature-and-differentiation}{Newton-Cotes weight finder}
+
+\begin{itemize}
+\item \coloremph{Newton-Cotes} quadrature rules are defined by equispaced nodes on $[a,b]$:
+
+\mdcond{
+open: $x_i=a+i(b-a)/(n+1)$, closed: $x_i=a+(i-1)(b-a)/(n-1)$.
+}
+
+\item The \coloremph{midpoint rule} is the $n=1$ open Newton-Cotes rule:
+
+\mdcond{
+\[M(f) = (b-a)f\left(\frac{a+b}{2}\right)\]
+}
+
+\item The \coloremph{trapezoid rule} is the $n=2$ closed Newton-Cotes rule:
+
+\mdcond{
+\[T(f) = \frac{(b-a)}{2}(f(a) + f(b))\]
+}
+
+\item \coloremph{Simpson's rule} is the $n=3$ closed Newton-Cotes rule:
+
+\mdcond{
+\[S(f)=\frac{b-a}{6}\left(f(a) + 4f\left(\frac{a+b}{2}\right) + f(b)\right)\]
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+\subsection{Error and Conditioning of Quadrature Rules}
+\begin{frame}[fragile]{Error in Newton-Cotes Quadrature}
+\urcornerlinkdemo{08-quadrature-and-differentiation}{Accuracy of Newton-Cotes}
+
+\begin{itemize}
+\item Consider the Taylor expansion of $f$ about the midpoint of the integration interval $m=(a+b)/2$:
+\mdcond{
+\[f(x) = f(m) + f'(m)(x-m) + \frac{f''(m)}{2}(x-m)^2 +\ldots\]
+}
+
+Integrating the Taylor approximation of $f$, we note that the odd terms drop: 
+\lgcond{
+\[\mathcal{I}(f) = \underbrace{f(m)(b-a)}_{M(f)} + \underbrace{\frac{f''(m)}{24}(b-a)^3}_{E(f)} + O((b-a)^5)\]
+Consequently, the midpoint rule is third-order accurate (first degree).
+}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Error Estimation}
+
+\begin{itemize}
+
+%\item Quadrature weights can be alternatively determined for a rule by solving the moment equations:
+%\lgcond{
+%\begin{align*}
+%\B V(\B x, \{\phi_i\}_{i=1}^n) \B w = \B y(\{\phi_i\}_{i=1}^n), \quad \text{where} \quad y_i = \mathcal{I}(\phi_i)
+%\end{align*}
+%}
+\item The trapezoid rule is also first degree, despite using higher-degree polynomial interpolant approximation, since 
+\lgcond{
+\begin{align*}
+f(m) = \frac{1}{2}\bigg(&f(a) - f'(m)(a-m) - \frac{f''(m)}{2}(a-m)^2 +\ldots \\
++&f(b) - f'(m)(b-m) - \frac{f''(m)}{2}(b-m)^2 +\ldots \bigg) \\
+\mathcal{I}(f)= T(f)  -& \underbrace{\frac{f''(m)}{12}(b-a)^3}_{2E(f)} - O((b-a)^5)
+\end{align*}
+}
+\item The above derivation allows us to obtain an error approximation via a difference of midpoint and trapezoidal rules:
+\lgcond{
+\[T(f)-M(f)\approx 3E(f).\]
+This approximation rapidly becomes accurate as $b-a$ decreases.
+}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Error in Polynomial Quadrature Rules}
+
+\begin{itemize}
+
+
+\item We can bound the error for a an arbitrary polynomial quadrature rule by
+\lgcond{
+\begin{align*}
+|\mathcal{I}(f)-Q_n(f)| &= |\mathcal{I}(f-p)| \\
+              &\leq (b-a) || f-p||_\infty \\
+              &\leq \frac{b-a}{4n}h^n || f^{(n)}||_\infty 
+\end{align*}
+where $h=\max_i(x_{i+1}-x_i)$.
+}
+\lgcond{
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Conditioning of Newton-Cotes Quadrature}
+
+\begin{itemize}
+\item We can ascertain stability of quadrature rules, by considering the amplification of a perturbation $\hat{f} = f+ \delta f$:
+\lgcond {
+\begin{align*}
+|Q_n(\hat{f})-Q_n(f)| &= |Q_n(\delta f)| \\
+                      &= \sum_{i=1}^n w_i \delta f(x_i) \\
+                      &\leq ||\B w||_1 ||\delta f||_\infty.
+\end{align*}
+Note that we always have $\sum_i w_i=b-a$, since the quadrature rule must be correct for a constant function.
+So if $\B w$ is positive $||\B w||_1=b-a$, the quadrature rule is stable, i.e. it matches the conditioning of the problem.
+}
+\item Newton-Cotes quadrature rules have at least one negative weight for any $n\geq 11$:
+\lgcond{
+More generally, $||\B w||_1\to \infty$ as $n \to \infty$ for fixed $b-a$. This means that the Newton-Cotes rules can be ill-conditioned.
+}
+\end{itemize}
+
+\end{frame}
+
+\subsection{Chebyshev Quadrature}
+
+\begin{frame}{Clenshaw-Curtis Quadrature}
+
+\begin{itemize}
+\item To obtain a more stable quadrature rule, we need to ensure the integrated interpolant is well-behaved as $n$ increases:
+
+\lgcond{
+\begin{itemize}
+\mitem Chebyshev quadrature nodes ensure that interpolant polynomial has bounded coefficients so long as $f$ is bounded, since the Vandermonde system defining its coefficients is well-conditioned.
+\mitem Formally, it can be shown that $w_i>0$ for the Chebyshev-node ({\color{red} Clenshaw-Curtis}) quadrature.
+\mitem The weights for Clenshaw-Curtis quadrature rules can be obtained by solutions to Vandermonde systems on $[-1,1]$ with Chebyshev-spaced nodes, then translating to a desired integration interval.
+\end{itemize}
+}
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}{Gaussian Quadrature}
+%
+%\begin{itemize}
+%\item So far, we have only considered quadrature rules based on a fixed set of nodes, but we can also choose a set of nodes to improve accuracy:
+%
+%\lgcond{
+%Choice of nodes gives additional $n$ parameters for a total of $2n$ degrees of freedom, permitting representation of polynomials of degree $2n-1$.
+%}
+%\item The \coloremph{unique} $n$-point \coloremph{Gaussian quadrature rule} is defined by the solution of the nonlinear form of the moment equations in terms of \textit{both} $\B x$ and $\B w$:
+%\lgcond{
+%Given any complete basis, we seek to solve the nonlinear equations,
+%\[\B V(\B x, \{\phi_i\}_{i=1}^{2n+1}) \B w = \B y(\{\phi_i\}_{i=1}^{2n+1}), \quad \text{where} \quad y_i = \mathcal{I}(\phi_i)\]
+%For fixed $\B x$, we have an overdetermined system of linear equations for $\B w$.
+%}
+%%To obtain a more stable quadrature rule, we need to ensure the integrated interpolant is well-behaved as $n$ increases:
+%%
+%%\lgcond {
+%%Chebyshev quadrature nodes ensure that interpolant polynomial has bounded coefficients so long as $f$ is bounded, since the Vandermonde system defining its coefficients is well-conditioned.
+%%
+%%Formally, it can be shown that $w_i>0$ for Chebyshev-node (Clenshaw-Curtis) quadrature.
+%%}
+%\end{itemize}
+%
+%\end{frame}
+%
+%\begin{frame}{Using Gaussian Quadrature Rules}
+%
+%\begin{itemize}
+%\item Gaussian quadrature rules are hard to determine and usually, but can be enumerated for a fixed interval, e.g. $a=0,b=1$, so it suffices to transform the integral to $[0,1]$
+%
+%\lgcond{
+%We have that 
+%\[\mathcal{I}(f) = \int_{a}^b f(x)dx = \int_0^1 g(t) dt \quad \text{where} \quad g(x) = f(t), t=\frac{x+b-a}{b-a}\]
+%
+%Choice of nodes gives additional $n$ parameters for a total of $2n$ degrees od freedom, permitting representation of polynomials of degree $2n-1$.
+%}
+%\item The \coloremph{unique} $n$-point \coloremph{Gaussian quadrature rule} is defined by the solution of the nonlinear form of the moment equations in terms of \textit{both} $\B x$ and $\B w$:
+%\lgcond{
+%Given any complete basis, we seek to solve the nonlinear equations,
+%\[\B V(\B x, \{\phi_i\}_{i=1}^{2n+1}) \B w = \B y(\{\phi_i\}_{i=1}^{2n+1}), \quad \text{where} \quad y_i = \mathcal{I}(\phi_i)\]
+%For fixed $\B x$, we have an overdetermined system of linear equations for $\B w$.
+%}
+%%To obtain a more stable quadrature rule, we need to ensure the integrated interpolant is well-behaved as $n$ increases:
+%%
+%%\lgcond {
+%%Chebyshev quadrature nodes ensure that interpolant polynomial has bounded coefficients so long as $f$ is bounded, since the Vandermonde system defining its coefficients is well-conditioned.
+%%
+%%Formally, it can be shown that $w_i>0$ for Chebyshev-node (Clenshaw-Curtis) quadrature.
+%%}
+%\end{itemize}
+%
+%\end{frame}
+%
+%\begin{frame}{Improvements to Gaussian Quadrature}
+%
+%\begin{itemize}
+%\item Gaussian quadrature rules are are accurate and stable but not progressive (nodes cannot be reused to obtain higher-degree approximation):
+%
+%\mdcond{}
+%
+%\item \coloremph{Kronod} quadrature rules construct $(2n+1)$-point quadrature $K_{2n+1}$ that is progressive w.r.t. Gaussian quadrature rule $G_n$
+%
+%\mdcond{}
+%
+%\item Gaussian quadrature rules are in general open, but Gauss-Radau and Gauss-Lobatto rules permit including end-points:
+%
+%\mdcond{
+%Gauss-Radau uses one of two end-points as a node, while Gauss-Lobatto quadrature uses both.
+%}
+%
+%\end{itemize}
+%
+%
+%\end{frame}
+%
+%
+%\begin{frame}{Composite and Adaptive Quadrature}
+%
+%\begin{itemize}
+%\item Composite quadrature rules are obtained by integrating a piecewise interpolant of $f$:
+%
+%\lgcond{}
+%
+%\item Adaptive quadrature corresponds to using composite quadrature with adaptive refinement:
+%
+%\lgcond{
+%Introduce new nodes where error estimate is large. 
+%Error estimate can be obtained by e.g. comparing trapezoid and midpoint rules, but can be completely wrong if function is insufficiently smooth.
+%}
+%
+%\end{itemize}
+%
+%
+%\end{frame}
+
+
+
+
+
+
+
+
+%\end{document}
+
+\subsection{Gaussian Quadrature}
+
+\begin{frame}{Gaussian Quadrature}
+\urcornerlinkdemo{08-quadrature-and-differentiation}{Gaussian quadrature weight finder}
+
+\begin{itemize}
+\item So far, we have only considered quadrature rules based on a fixed set of nodes, but we may also be able to choose nodes to maximize accuracy:
+
+\lgcond{
+\begin{itemize}
+\item Choice of nodes gives additional $n$ parameters for total $2n$ degrees of freedom.
+\mitem Permits exact integration of degree-$(2n-1)$ polynomials and corresponding general accuracy.
+\end{itemize}
+}
+\item The \coloremph{unique} $n$-point \coloremph{Gaussian quadrature rule} is defined by the solution of the nonlinear form of the moment equations in terms of \textit{both} $\B x$ and $\B w$:
+
+\lgcond{
+Given any complete basis, we seek to solve the nonlinear equations for $\B x,\B w$,
+\[\B V(\B x, \{\phi_i\}_{i=1}^{2n+1})^T \B w = \B y, \quad \text{where} \quad y_i = \mathcal{I}(\phi_i).\]
+\begin{itemize}
+\item These nonlinear equations generally have a unique solution $(\B x^*, \B w^*)$.
+\mitem For fixed $\B x$, we have an overdetermined system of linear equations for $\B w$.
+\end{itemize}
+}
+%To obtain a more stable quadrature rule, we need to ensure the integrated interpolant is well-behaved as $n$ increases:
+%
+%\lgcond {
+%Chebyshev quadrature nodes ensure that interpolant polynomial has bounded coefficients so long as $f$ is bounded, since the Vandermonde system defining its coefficients is well-conditioned.
+%
+%Formally, it can be shown that $w_i>0$ for Chebyshev-node (Clenshaw-Curtis) quadrature.
+%}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Using Gaussian Quadrature Rules}
+
+\begin{itemize}
+\item Gaussian quadrature rules are hard to compute, but can be enumerated for a fixed interval, e.g. $a=0,b=1$, so it suffices to transform the integral to $[0,1]$
+
+\lgcond{
+\begin{itemize}
+\item We can transform a given integral using variable substitution $t=\frac{x-a}{b-a}$,
+\[\mathcal{I}(f) = \int_{a}^b f(x)dx = (b-a)\int_0^1 g(t) dt \quad \text{where} \quad g(t) = f(t(b-a)+a)).\]
+\item For quadrature rules defined on $[-1,1]$, we can transform via the substitution $t=2\frac{x-a}{b-a}-1$,
+\[\mathcal{I}(f) = \int_{a}^b f(x)dx = \frac{b-a}{2}\int_{-1}^1 g(t) dt \quad \text{where} \quad g(t) = f((t+1)(b-a)/2+a).\]
+\end{itemize}
+}
+
+\item Gaussian quadrature rules are accurate and stable but not progressive (nodes cannot be reused to obtain higher-degree approximation):
+
+\mdcond{
+\begin{itemize}
+\item maximal degree is obtained
+\sitem weights are always positive (perfect conditioning)
+\end{itemize}
+}
+
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Progressive Gaussian-like Quadrature Rules}
+
+\begin{itemize}
+\item \coloremph{Kronod} quadrature rules construct $(2n+1)$-point $(3n+1)$-degree quadrature $K_{2n+1}$ that is progressive with respect to Gaussian quadrature rule $G_n$:
+
+\lgcond{
+\begin{itemize}
+\item Gaussian quadrature rule $G_{2n+1}$ would use same number of points and have degree $4n+1$.
+\mitem Kronod rule points are optimal chosen to reuse all points of $G_n$, so $n+1$ rather than $2n+1$ new evaluations are necessary.
+\end{itemize}
+}
+\item \coloremph{Patterson} quadrature rules use $2n+2$ more points to extend $(2n+1)$-point Kronod rule  to degree $6n+4$, while reusing all $2n+1$ points.
+
+\item Gaussian quadrature rules are in general open, but \coloremph{Gauss-Radau} and \coloremph{Gauss-Lobatto} rules permit including end-points:
+
+\lgcond{
+Gauss-Radau uses one of two end-points as a node, while Gauss-Lobatto quadrature uses both.
+}
+
+\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}{Composite and Adaptive Quadrature}
+
+\begin{itemize}
+\item \coloremph{Composite quadrature rules} are obtained by integrating a piecewise interpolant of $f$:
+
+\lgcond{
+For example, we can derive simple composite Newton-Cotes rules by partitioning the domain into sub-intervals $[x_i,x_{i+1}]$:
+\begin{itemize}
+\sitem composite midpoint rule 
+  \[\mathcal{I}(f) = \sum_{i=1}^{n-1} \int_{x_i}^{x_{i+1}} f(x)dx \approx \sum_{i=1}^{n-1} (x_{i+1}-x_i)f((x_{i+1}+x_i)/2)\]
+\item composite trapezoid rule
+  \[\mathcal{I}(f) = \sum_{i=1}^{n-1} \int_{x_i}^{x_{i+1}} f(x)dx \approx \sum_{i=1}^{n-1} \frac{(x_{i+1}-x_i)}2 (f(x_{i+1})+f(x_i))\]
+\end{itemize}
+}
+
+\item Composite quadrature can be done with adaptive refinement:
+
+\lgcond{
+Introduce new nodes where error estimate is large. 
+Error estimate can be obtained by e.g. comparing trapezoid and midpoint rules, but can be completely wrong if function is insufficiently smooth.
+}
+
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}{More Complicated Integration Problems}
+
+\begin{itemize}
+\item To handle improper integrals can either transform integral to get rid of infinite limit or use appropriate open quadrature rules.
+
+\mdcond{}
+
+\item Double integrals can simply be computed by successive 1-D integration.
+
+\mdcond{
+Composite multidimensional rules are also possible by partitioning the domain into chunks.
+}
+
+\item High-dimensional integration is often effectively done by \coloremph{Monte Carlo}:
+
+\lgcond{
+\[\int_\Omega f(\B x) d\B x = E[Y], \quad Y = \frac{|\Omega|}{N} \sum_{i=1}^N Y_i, \quad Y_i = f(\B x_i), \quad \B x_i \ \  \text{chosen randomly from $\Omega$}.\]
+\begin{itemize}
+\item Convergence rate is independent of function (effective polynomial degree approximation) or dimension of integration domain.
+\mitem Instead, it depends on number of samples ($N$), with error scaling as $O(1/\sqrt{N})$.
+\end{itemize}
+}
+
+
+\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}{Integral Equations}
+
+\begin{itemize}
+\item Rather than evaluating an integral, in solving an \coloremph{integral equation} we seek to compute the integrand. A typical linear integral equation has the form
+\[\int_a^b K(s,t)u(t) dt = f(s), \quad \text{where} \quad K \quad \text{and} \quad f \quad \text{are known}.\]
+\lgcond{
+\begin{itemize}
+\item Useful for recovering signal $u$ given response function with kernel $K$ and measurements of $f$.
+\mitem Also arise from solve equations arising from Green's function methods for PDEs.
+\end{itemize}
+}
+\item Using a quadrature rule with weights $w_1,\ldots, w_n$ and nodes $t_1,\ldots, t_n$ obtain
+\lgcond{
+\[\sum_{j=1}^n w_jK(s,t_j)u(t_j) = f(s).\]
+Discrete sample of $f$ on $s_1,\ldots, s_n$ yields a linear system of equations,
+\[\sum_{j=1}^n w_jK(s_i,t_j)u(t_j) = f(s_i).\]
+%The resulting matrix $\B A$ can be ill-conditioned for many kernels $K$.
+}
+\end{itemize}
+
+
+\end{frame}
+
+
+%\begin{frame}{Challenges in Solving Integral Equations}
+%
+%\begin{itemize}
+%\item Integral equations based on response functions tend to be ill-conditioned, which is resolved using
+%
+%\begin{itemize}
+%\item truncated singular value decomposition of $\B A$, where $a_{ij}=w_jK(s_i,t_j)$
+%
+%\mdcond{}
+%
+%\item replacing the linear system with a regularized linear least squares problem,
+%
+%\mdcond{}
+%
+%\item expressing the solution using a basis
+%
+%\mdcond{Let $u(t)\approx \sum_{j=1}^n c_j \phi_j(t)$ and derive equations for the coefficients.}
+%
+%\end{itemize}
+%\end{itemize}
+%
+%
+%\end{frame}
+
+
+\begin{frame}{Numerical Differentiation}
+\urcornerlinkdemo{08-quadrature-and-differentiation}{Taking Derivatives with Vandermonde Matrices}
+
+\begin{itemize}
+\item Automatic (symbolic) differentiation is a surprisingly viable option:
+\lgcond{
+\begin{itemize}
+\item Any computer program is differentiable, since it is an assembly of basic arithmetic operations.
+\item Existing software packages can automatically differentiate whole programs.
+\end{itemize}
+}
+\item Numerical differentiation can be done by interpolation or finite differencing:
+
+\lgcond{
+\begin{itemize}
+\item Given polynomial interpolant, its derivative is easy to obtain by differentiating the basis in which it is expressed,
+\[f'(x)\approx p'(x) = \begin{bmatrix} \phi'_1(x) & \cdots &\phi'_n(x) \end{bmatrix}^T\B V(\B t, \{\phi_i\}_{i=1}^n)^{-1} \B y, \ \text{where} \ y_i=f(t_i).\]
+\item Obtaining the values of the derivative at the interpolation nodes, can be done via
+\[\underbrace{\B V(\B t, \{\phi_i'\}_{i=1}^n)\B V(\B t, \{\phi_i\}_{i=1}^n)^{-1}}_\text{Differentiation matrix} \B y, \ \text{where} \ y_i=f(t_i).\]
+\item Finite-differencing formulas effectively use linear interpolant.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Accuracy of Finite Differences}
+
+\dblurcornerlinkdemo{08-quadrature-and-differentiation}{Finite Differences vs Noise}{08-quadrature-and-differentiation}{Floating point vs Finite Differences}
+
+\begin{itemize}
+\item \coloremph{Forward and backward differencing} provide first-order accuracy:
+
+\lgcond{
+These can be derived, respectively from forward and backward Taylor expansions of $f$ about $x$,
+\begin{align*}
+f(x+h) &= f(x) + f'(x)h + f''(x) h^2 /2 + \ldots \\
+f(x-h) &= f(x) - f'(x)h + f''(x) h^2 /2 - \ldots 
+\end{align*}
+For forward differencing, we obtain an approximation from the first equation,
+\[f'(x) = \frac{f(x+h)- f(x)}h + f''(x) h /2 + \ldots.\]
+}
+\item \coloremph{Centered differencing} provides second-order accuracy.
+\lgcond{
+Subtracting the backward Taylor expansion from the forward, we obtain centered differencing,
+\[f'(x) = \frac{f(x+h)- f(x-h)}{2h} + O(h^2).\]
+Second order accuracy is due to cancellation of odd terms like $f''(x)h/2$.
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Extrapolation Techniques}
+
+\urcornerlinkdemoinclass{08-quadrature-and-differentiation}{Richardson with Finite Differences}{inclass-richardson}{Richardson Extrapolation}
+
+\begin{itemize}
+\item Given a series of approximate solutions produced by an iterative procedure, a more accurate approximation may be obtained by \coloremph{extrapolating} this series.
+
+\lgcond{
+For example, as we lower the step size $h$ in a finite-difference formula, we can try to extrapolate the series to $h=0$, if we know that 
+\[F(h)=a_0 + a_1h^p + O(h^r) \ \text{as} \ h\to 0 \ \text{and seek to determine $F(0)=a_0$},\]
+for example in centered differences $p=2$ and $r=4$.
+}
+\item In particular, given two guesses, \coloremph{Richardson extrapolation} eliminates the leading order error term.
+
+\lgcond{
+Seek to eliminate $a_1h^p$ term in  $F(h)$, $F(h/2)$ to improve approximation of $a_0$,
+\begin{align*}
+F(h) &= a_0 + a_1h^p + O(h^r), \\
+F(h/2) &= a_0 + a_1h^p/2^p + O(h^r), \\
+a_0 &= F(h) - \frac{F(h)-F(h/2)}{1-1/2^{p}} + O(h^r).
+\end{align*}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{High-Order Extrapolation}
+
+\begin{itemize}
+\item Given a series of $k$ approximations, \coloremph{Romberg integration} applies $(k-1)$-levels of Richardson extrapolation.
+
+\lgcond{
+Can apply Richardson extrapolation to each of $k-1$ pairs of consecutive nodes, then proceed recursively on the $k-1$ resulting approximations.
+}
+
+\item Extrapolation can be used within an iterative procedure at each step:
+
+\lgcond{
+For example, Steffensen's method for finding roots of nonlinear equations,
+\[x_{n+1} = x_n + \frac{f(x_n)}{1-f(x_n+f(x_n))/f(x_n)},\]
+derived from Aitken's delta-squared extrapolation process:
+\begin{itemize}
+\item achieves quadratic convergence,
+\sitem requires no derivative,
+\sitem competes with the Secant method (quadratic versus superlinear convergence, but an extra function evaluation necessary).
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+
+
+
+%\end{document}

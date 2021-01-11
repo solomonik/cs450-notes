@@ -1,0 +1,457 @@
+%%\documentclass[handout]{beamer}
+%\documentclass[aspectratio=169,13pt]{beamer}
+
+%\input{./preamble}
+
+\subtitle{Linear Least Squares}
+\date{}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Existence and Conditioning}
+
+\begin{frame}[fragile]{Linear Least Squares}
+\begin{itemize}
+\item Find $\B{x}^\star= \argmin_{\B{x}\in\mathbb{R}^{n}}||\B A \B x - \B b||_2$ where $\B A \in\mathbb{R}^{m\times n}$:
+
+\mdcond{
+Since $m\geq n$, the minimizer generally does not attain a zero residual $\B A \B x -\B b$.
+
+We can rewrite the optimization problem constraint via
+\[\B{x}^\star= \argmin_{\B{x}\in\mathbb{R}^{n}}||\B A \B x - \B b||_2^2=\argmin_{\B{x}\in\mathbb{R}^{n}}\Big[(\B A \B x - \B b)^\T(\B A \B x - \B b)\Big]\]
+}
+
+\item Given the SVD $\B{A}=\B U \B \Sigma \B V^\T$ we have $\B{x}^\star = \B V \B \Sigma^{\dagger}\B U^\T \B b$, where $\B \Sigma^{\dagger}$ contains the reciprocal of all nonzeros in $\B \Sigma$:
+%$\underbrace{\B \Sigma^{-1}}_{\tiny \begin{bmatrix} \sigma_\text{max}^{-1} & & &\\ & \ddots & &\\ & & \sigma_\text{min}^{-1} & \\ & & & \B 0 \end{bmatrix}} \B U^\T \B b$:
+
+  \lgcond{
+\begin{itemize}
+\item  The minimizer satisfies $\B U \B \Sigma \B V^\T \B{x}^\star \cong \B b$ and consequently also satisfies
+  \[\B \Sigma \B{y}^\star \cong \B{d} \quad \text{where $\B{y}^\star = \B{V}^\T \B{x}^\star$ and $\B{d}=\B U^\T \B b$}.\]
+\item The minimizer of the reduced problem is $\B{y}^\star = \B \Sigma^{\dagger}\B{d}$, so $y_i = d_i/\sigma_i$ for $i\in \{1,\ldots, n\}$ and $y_i=0$ for $i\in\{n+1,\ldots, m\}$.
+\end{itemize}
+%  \begin{align*}
+%  0 
+%  &=(\B U \B \Sigma \B V^\T \B x^\star - \B b)^\T\B U \B U^\T(\B U \B \Sigma \B V^\T  \B x^\star - \B b )  
+%  - \min_{\B{x}\in\mathbb{R}^{n}}||\B A \B x - \B b||_2 \\
+%  &=(\B \Sigma \B V^\T \B x^\star - \B U^\T \B b)^\T (\B \Sigma \B V^\T  \B x^\star - \B U^\T \B b )
+%  - \min_{\B{x}\in\mathbb{R}^{n}}||\B A \B x - \B b||_2 \\
+%  &=(\B V^\T \B x^\star - \B \Sigma^{\dagger} \B U^\T \B b)^\T\B \Sigma^2  (\B V^\T  \B x^\star - \B \Sigma^{\dagger}\B U^\T \B b ) \\
+%  &=(\B x^\star - \B V \B \Sigma^{\dagger} \B U^\T \B b)^\T\B V \B \Sigma^2 \B V^\T  ( \B x^\star - \B V\B \Sigma^{\dagger}\B U^\T \B b ) 
+%  \end{align*}
+%  implies $\B x^\star = \B V\B \Sigma^{\dagger}\B U^\T \B b$, where $\B \Sigma^{\dagger}$ contains the reciprocal of all nonzeros in $\B \Sigma$.
+  }
+\smcond{}
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Conditioning of Linear Least Squares}
+\urcornerlinkdemo{03-least-squares}{Polynomial fitting via the normal equations}
+
+\begin{itemize}
+\item Consider fitting a line to a collection of points, then perturbing the points:
+
+\lgcond{ 
+\begin{itemize}
+\item If our line closely fits all of the points, a small perturbation to the points will not change the ideal fit line (least squares solution) much.
+      Note that, if a least squares solution has a very small residual, any other solution with a residual close to as small, should be close to parallel to this solution.
+\item When the points are distributed erratically and do not admit a reasonable linear fit, then the least squares solution has a large residual, and totally different lines may exist with a residual nearly as small.
+      For example, if the points are in a ball around the origin, any linear fit has the same residual.
+      A tiny perturbation could then perturb the least squares solution to be perpendicular to the original.
+\end{itemize}
+}
+
+\item LLS is ill-posed for any $\B A$, unless we consider solving for a particular $\B b$
+
+\lgcond{ 
+\begin{itemize}
+\item If $\B b$ is entirely outside the span of $\B A$ then any perturbation to $\B A$ or $\B b$ can completely defines the new solution.
+Similarly, if most of $\B b$ is outside the span of $\B A$, a perturbation can cause the solution to fluctuate wildly.
+\item On other hand, if for a particular $\B b$ we can find a solution with (near-)zero residual, a small relative perturbation to $\B b$ or $\B A$ will have an effect similar to that of a linear system perturbation (growth bounded by $\kappa(\B A)=\sigma_\text{max}/\sigma_\text{min}$).
+\end{itemize}
+}
+
+\end{itemize}
+\end{frame}
+
+%\begin{frame}{Stability of Normal Equations}
+%
+%\begin{itemize}
+%\item Normal equations solve $\B A^\T\B A\B{x}= \B A \B b$:
+%
+%\lgcond{
+%Consider perturbation $\B{\delta b}$ to $\B b$, in the worst case $\B A \B b$ is perturbed by $\sigma_\text{max} \B{\delta b}$.
+%Further $\kappa(\B A^\T\B A)=\kappa(\B A)^2$ so the relative error can be amplified by the square of the expected condition number, given a small residual in the true solution.
+%
+%%so the linear system attains a worst case solution perturbation of norm $\sigma_\text{max}^3 ||\B{\delta b}||$.
+%%Assuming the residual is small, we can bound the backward error on $\B b$ by $\frac{\sigma_\text{max}^3}{\sigma_\text{min}} ||\B{\delta b}||$
+%}
+%
+%\item We can also obtain a QR factorization by means of Cholesky of $\B A^\T\B A$ (known as Cholesky-QR):
+%
+%\lgcond{
+%\begin{itemize}
+%\item The QR factorization $\B A =\B Q \B R$ so long as $\B R$ has a positive diagonal, so we have 
+%\[\B A^\T\B A=\B R^T \B Q^T\B Q\B R = \B R^T \B R\]
+%and thus can obtain $\B R$ by Cholesky $\B A^\T\B A$, which is symmetric positive definite.
+%\item However, if condition number of $\B A^\T\B A$ is high, we can lose positive-definiteness due to roundoff error and Cholesky factorization can break down.
+%\item Moreover, if we obtain $\B{\hat{Q}}$ via $\B A \B R^{-1}$, round-off error can result in a loss of orthogonality in the columns of $\B{\hat{Q}}$.
+%\item So long as $\kappa(\B A)<\sqrt{1/\epsilon_\text{mach}}$, a second iteration of Cholesky-QR on the computed reduced $\B{\hat{Q}}=\B{Q}\B{\hat{R}}$ obtains an orthogonal $\B Q$ and a correction $\B{\hat{R}}$ to $\B{R}$.
+%\end{itemize}
+%
+%}
+%
+%\end{itemize}
+%\end{frame}
+
+
+\section{Normal Equations}
+
+\begin{frame}[fragile]{Normal Equations}
+\dblurcornerlinkdemo{03-least-squares}{Normal equations vs Pseudoinverse}{03-least-squares}{Issues with the normal equations}
+
+\begin{itemize}
+\item \coloremph{Normal equations} are given by solving $\B A^\T\B A\B{x}= \B A^\T \B b$:
+
+\lgcond{
+If $\B A^\T\B A\B{x}= \B A^\T \B b$ then
+\begin{align*}
+ %\B A^\dagger\B A^T\B A\B{x}^\star= \B A^\dagger\B A \B b  \quad \text{note} \ (\B A^{\dagger}= \B U \B \Sigma^\dagger \B V^\T \\
+ (\B U \B \Sigma \B V^\T)^\T \B U \B \Sigma \B V^\T\B{x}&= (\B U \B \Sigma \B V^\T)^\T \B b\\
+\B\Sigma^\T \B \Sigma \B V^\T\B{x}&= \B \Sigma^\T \B U^\T \B b\\
+\B V^\T\B{x}&= (\B\Sigma^\T \B \Sigma)^{-1}\B \Sigma^\T \B U^\T \B b=  \B \Sigma^\dagger \B U^\T \B b \\
+\B{x} &=  \B V\B \Sigma^\dagger \B U^\T \B b = \B{x}^\star
+\end{align*}
+}
+\item However, solving the normal equations is a more ill-conditioned problem then the original least squares algorithm
+
+  \lgcond{
+  Generally we have $\kappa(\B A^T \B A)= \kappa(\B A)^2$ (the singular values of $\B A^T\B A$ are the squares of those in $\B A$).
+  Consequently, solving the least squares problem via the normal equations may be unstable because it involves solving a problem that has worse conditioning than the initial least squares problem.
+  }
+
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Solving the Normal Equations}
+
+\begin{itemize}
+\item If $\B A$ is full-rank, then $\B A^\T \B A$ is symmetric positive definite (SPD):
+
+\lgcond{
+\begin{itemize}
+\item Symmetry is easy to check $(\B A^\T \B A)^\T=\B A^\T \B A$.
+\sitem $\B A$ being full-rank implies $\sigma_\text{min} > 0$ and further if $\B A = \B U \B \Sigma \B V^T$ we have
+\[\B A^\T\B A = \B V^T \B \Sigma^2 \B V\]
+which implies that rows of $\B V$ are the eigenvectors of $\B A^\T \B A$ with eigenvalues $\B \Sigma^2$ since $\B A^T \B A \B V^\T = \B V^T \B \Sigma^2$.
+\end{itemize}
+}
+
+\item Since $\B A^\T \B A$ is SPD we can use Cholesky factorization, to factorize it and solve linear systems:
+
+\lgcond{
+\[\B A^\T \B A = \B L \B L^\T\]
+}
+\end{itemize}
+\end{frame}
+
+
+\section{QR Decomposition}
+
+\subsection{Existence and Applicability}
+
+\begin{frame}{QR Factorization}
+
+
+\begin{itemize}
+\item If $\B A$ is full-rank there exists an orthogonal matrix $\B Q$ and a unique upper-triangular matrix $\B R$ with a positive diagonal such that \(\B A = \B Q \B R\)
+
+\lgcond{
+\begin{itemize}
+\item Given $\B A^\T\B A =\B L \B L^\T$, we can take $\B R = \B L^\T$ and obtain $\B Q=\B A \B L^{-T}$, since
+\(\underbrace{\B L^{-1} \B A^\T}_{\B Q^T} \underbrace{\B A \B L^{-T}}_{\B Q} = \B I\)
+implies that $\B Q$ has orthonormal columns.
+%\item  We have $\B A^\T \B A = \B{{R}}^T \B{{R}}$, so the solution to the normal equations (which is also the minimizer $\B{x}^\star$) satisfies $\B{{R}}^T \B{R} \B x^\star = \B{{R}}^\T\B Q^\T \B b$. 
+%  Furthermore, it suffices to solve $\B{R} \B x^\star = \B Q^\T \B b$, which can be done by backward substitution after transforming $\B b$.
+\end{itemize}
+}
+
+\item A reduced QR factorization (unique part of general QR) is defined so that $\B Q\in\mathbb{R}^{m\times n}$ has orthonormal columns and $\B{R}$ is square and upper-triangular
+
+  \lgcond{
+  
+  A full QR factorization gives $\B Q \in\mathbb{R}^{m\times m}$ and $\B R \in \mathbb{R}^{m\times n}$, but since $\B R$ is upper triangular, the latter $m-n$ columns of $\B Q$ are only constrained so as to keep $\B Q$ orthogonal.
+  The \coloremph{reduced QR} factorization is given by taking the first $n$ columns $\B Q$ and  $\B{\hat{Q}}$ the upper-triangular block of $\B R$, $\B{\hat{R}}$ giving $\B A = \B{\hat{Q}}\B{\hat{R}}$.
+  }
+
+\item We can solve the normal equations (and consequently the linear least squares problem) via reduced QR as follows
+\mdcond{
+\[\B A^\T \B A \B x = \B A^\T\B b 
+\quad \Rightarrow\quad  \B{\hat{R}}^\T \underbrace{\B{\hat{Q}}^\T \B{\hat{Q}}}_{\B I} \B{\hat{R}} \B x = \B{\hat{R}}^\T\B{\hat{Q}}^\T\B b 
+\quad \Rightarrow\quad \B{\hat{R}} \B x = \B{\hat{Q}}^\T\B b\]
+}
+\end{itemize}
+\end{frame}
+
+\subsection{Gram-Schmidt Algorithm}
+
+\begin{frame}{Gram-Schmidt Orthogonalization}
+
+\dblurcornerlinkdemo{03-least-squares}{Gram-Schmidt--The Movie}{03-least-squares}{Gram-Schmidt and Modified Gram-Schmidt}
+
+\begin{itemize}
+\item {\bf Classical Gram-Schmidt process for QR:}
+
+\lgcond{
+The Gram-Schmidt process orthogonalizes a rectangular matrix, i.e. it finds a set of orthonormal vectors
+with the same span as the columns of the given matrix.
+If $\B{a}_i$ is the $i$th column of the input matrix, the $i$th orthonormal vector ($i$th column of $\B Q$) is 
+\[\B{q}_i = \B{b}_i/\underbrace{||\B{b}_i||_2}_{r_{ii}}, \quad \text{where} \quad \B{b}_i =\B{a}_i - \sum_{j=1}^{i-1}\underbrace{\langle\B{q}_j,\B{a}_i\rangle}_{r_{ji}}\B{q}_j.\]
+}
+
+\item {\bf Modified Gram-Schmidt process for QR:}
+
+  \lgcond{
+  Better numerical stability is achieved by orthogonalizing each vector with respect to each previous vector in sequence (modifying the vector prior to orthogonalizing to the next vector), so 
+$\B{b}_i = \text{MGS}(\B{a}_i,i-1)$, where $\text{MGS}(\B{d},0)=\B{d}$ and 
+\[\text{MGS}(\B d,j) = \text{MGS}(\B{d} - \langle\B{q}_j,\B{d}\rangle\B{q}_j,j-1)\]
+  }
+
+
+\end{itemize}
+\end{frame}
+
+\subsection{Householder Algorithm}
+
+\begin{frame}{Householder QR Factorization}
+
+\urcornerlinkdemo{03-least-squares}{3x3 Householder demo}
+
+\begin{itemize}
+\item {\bf A Householder transformation $\B Q=\B I -2\B u \B u^\T$ is an orthogonal matrix defined to annihilate entries of a given vector $\B z$, so $||\B z||_2\B Q  \B e_1 = \B z$:}
+
+  \lgcond{
+  \begin{itemize}
+  \item Householder QR achieves unconditional stability, by applying only orthogonal transformations to reduce the matrix to upper-triangular form.
+  \item Householder transformations (reflectors) are orthogonal matrices, that reduce a vector to a multiple of the first elementary vector, 
+  $\alpha \B e_1 = \B Q\B z.$
+  \item Because multiplying a vector by an orthogonal matrix preserves its norm, we must have that $|\alpha| = ||\B z||_2$.
+  \item As we will see, this transformation can be achieved by a rank-1 perturbation of identify of the form $\B Q=\B I -2\B u \B u^\T$ where $\B u$ is a normalized vector.
+  \item Householder matrices are both symmetric and orthogonal implying that $\B Q = \B Q^\T  = \B Q^{-1}$.
+\end{itemize}
+}
+  \item Imposing this form on $\B{Q}$ leaves exactly two choices for $\B u$ given $\B z$,
+  \[\B u =\frac{\B z \pm ||\B z||_2\B e_1}{||\B z \pm ||\B z||_2\B e_1||_2}\]
+
+
+\end{itemize}
+\end{frame}
+
+%\begin{frame}{Computing Householder Transformations}
+%
+%
+%\begin{itemize}
+%\item To find a Householder transformation that annihilates a given vector $\B z$, compute $\B u =\frac{\B z \pm ||\B z||_2\B e_1}{||\B z \pm ||\B z||_2\B e_1||_2}$
+%
+%\lgcond{
+%
+%}
+%\item Householder transformations can be \coloremph{aggregated} in the form $\B I-\B Y \B T \B Y^\T$ where $\B Y$ is lower-trapezoidal and $\B T$ is upper-triangular
+%  \lgcond{
+%  }
+%
+%\end{itemize}
+%\end{frame}
+%
+%
+\begin{frame}{Applying Householder Transformations}
+
+\urcornerlinkinclass{inclass-householder}{Householder QR}
+
+\begin{itemize}
+\item The product $\B x = \B Q \B w$ can be computed using $O(n)$ operations if $\B Q$ is a Householder transformation
+
+\lgcond{
+\[\B x = (\B I - 2\B u \B u^\T)\B w = \B w - 2\langle\B u, \B w\rangle \B u \]
+}
+
+\item Householder transformations are also called \coloremph{reflectors} because their application reflects a vector along a hyperplane (changes sign of component of $\B w$ that is parallel to $\B u$)
+
+  \lgcond{
+\begin{itemize}
+\item $\B I - \B u\B u^\T$ would be an elementary projector, since $\langle  \B u, \B w\rangle\B u$ gives component of $\B w$ pointing in the direction of $\B u$ and 
+\[\B x = (\B I - \B u\B u^\T)\B w = \B w - \langle \B u, \B w\rangle\B u\]
+subtracts it out.
+\sitem On the other hand, Householder reflectors give
+\[\B y = (\B I - 2\B u\B u^\T)\B w = \B w - 2\langle \B u, \B w\rangle\B u = \B x -\langle \B u, \B w\rangle\B u\]
+which reverses the sign of that component, so that $||\B y||_2 = ||\B w||_2$.
+\end{itemize}
+  }
+
+
+
+\end{itemize}
+\end{frame}
+
+\subsection{Givens Algorithm}
+
+\begin{frame}{Givens Rotations}
+
+\begin{itemize}
+\item Householder reflectors reflect vectors, Givens rotations rotate them
+
+\lgcond{
+\begin{itemize}
+\sitem Householder matrices reflect vectors across a hyperplane, by negating the sign of the vector component that is perpendicular to the hyperplane (parallel to $\B u$)
+\sitem Any vector can be reflected to a multiple of an elementary vector by a single Householder rotation (in fact, there are two rotations, resulting in a different sign of the resulting vector)
+\sitem Givens rotations instead rotate vectors by an axis of rotation that is perpendicular to a hyperplane spanned by two elementary vectors
+\sitem Consequently, each Givens rotation can be used to zero-out (annihilate) one entry of a vector, by rotating it so that the component of the vector pointing in the direction of the axis corresponding to that entry, points into a different axis
+\end{itemize}
+}
+
+\item Givens rotations are defined by orthogonal matrices of the form $\begin{bmatrix} c & s \\ -s & c\end{bmatrix}$
+
+\lgcond{
+\begin{itemize}
+\sitem Given a vector $\begin{bmatrix} a \\ b \end{bmatrix}$ we define $c$ and $s$ so that
+\(\begin{bmatrix} c & s \\ -s & c\end{bmatrix}\begin{bmatrix} a \\ b \end{bmatrix} = \begin{bmatrix} \sqrt{a^2+b^2} \\ 0 \end{bmatrix}\)
+\sitem Solving for $c$ and $s$, we get
+\(c = \frac{a}{\sqrt{a^2 + b^2}}, \quad s = \frac{b}{\sqrt{a^2+b^2}}\)
+\end{itemize}
+}
+
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{QR via Givens Rotations}
+\urcornerlinkdemo{03-least-squares}{Relative cost of matrix factorizations}
+
+\begin{itemize}
+\item We can apply a Givens rotation to a pair of matrix rows, to eliminate the first nonzero entry of the second row
+
+\lgcond{
+\[\begin{bmatrix} \B I & & & & \\ & c & & s & \\ & & \B I & & \\ & -s & & c & \\ & & & & \B I\end{bmatrix}\begin{bmatrix} \vdots \\ a \\ \vdots \\ b \\ \vdots \end{bmatrix} =\begin{bmatrix} \vdots \\ \sqrt{a^2+b^2} \\ \vdots \\ 0 \\ \vdots \end{bmatrix} \]
+
+}
+
+\item Thus, $n(n-1)/2$ Givens rotations are needed for QR of a square matrix
+
+\lgcond{
+\begin{itemize}
+\sitem Each rotation modifies two rows, which has cost $O(n)$
+\sitem Overall, Givens rotations cost $2n^3$, while Householder QR has cost $(4/3)n^3$
+\sitem Givens rotations provide a convenient way of thinking about QR for sparse matrices, since nonzeros can be successively annihilated, although they introduce the same amount of fill (new nonzeros) as Householder reflectors
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\section{Rank-Deficient Problems}
+
+\begin{frame}{Rank-Deficient Least Squares}
+\urcornerlinkinclass{inclass-pinv}{Rank Deficient Least Squares Problems}
+
+\begin{itemize}
+\item Suppose we want to solve a linear system or least squares problem with a (nearly) rank deficient matrix $\B A$
+
+\lgcond{
+\begin{itemize}
+\item A rank-deficient (singular) matrix satisfies $\B A \B x = \B 0$ for some $\B x \neq \B 0$
+\sitem Rank-deficient matrices must have at least one zero singular value
+\sitem Matrices are said to be deficient in \coloremph{numerical rank} if they have extremely small singular values
+\sitem The solution to both linear systems (if it exists) and least squares is not unique, since we can add to it any multiple of $\B x$
+\end{itemize}
+}
+
+\item Rank-deficient least squares problems seek a minimizer $\B x$ of $||\B A \B x -\B b||_2$ of minimal norm $||\B x||_2$
+
+\lgcond{
+\begin{itemize}
+\item If $\B A$ is a diagonal matrix (with some zero diagonal entries), the best we can do is $x_i=b_i/a_{ii}$ for all $i$ such that $a_{ii}\neq 0$ and $x_i=0$ otherwise
+\item We can solve general rank-deficient systems and least squares problems via $\B x = \B A^{\dagger}\B b$ where the pseudoinverse is
+\[\B A^{\dagger} = \B V \B \Sigma^{\dagger} \B U^T \quad \sigma^\dagger_{i} = \begin{cases} 1/ \sigma_i &: \sigma_i > 0 \\ 0 &: \sigma_i = 0 \end{cases}\]
+Each rotation modifies two rows, which has cost $O(n)$
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Truncated SVD}
+\urcornerlinkdemo{03-least-squares}{Image compression}
+
+\begin{itemize}
+\item After floating-point rounding, rank-deficient matrices typically regain full-rank but have nonzero singular values on the order of $\epsilon_\text{mach}\sigma_\text{max}$
+
+\lgcond{
+\begin{itemize}
+\item Very small singular values can cause large fluctuations in the solution
+\sitem To ignore them, we can use a pseudoinverse based on the \coloremph{truncated SVD} which retains singular values above an appropriate threshold
+\sitem Alternatively, we can use Tykhonov regularization, solving least squares problems of the form $\min_{\B x} ||\B A\B x - \B b||_2^2 + \alpha ||\B x||^2$, which are equivalent to the augmented least squares problem
+\[\begin{bmatrix} \B A \\ \sqrt{\alpha}\B I \end{bmatrix} \B x \cong \begin{bmatrix} \B b \\ \B 0 \end{bmatrix}\]
+\end{itemize}
+}
+\item By the \coloremph{Eckart-Young-Mirsky theorem}, truncated SVD also provides the best low-rank approximation of a matrix (in 2-norm and Frobenius norm)
+
+\lgcond{
+\begin{itemize}
+\sitem The SVD provides a way to think of a matrix as a sum of outer-products $\sigma_i \B u_i\B v_i^\T$ that are disjoint by orthogonality and the norm of which is $\sigma_i$
+\sitem Keeping the $r$ outer products with largest norm provides the best rank-$r$ approximation
+\end{itemize}
+}
+\end{itemize}
+
+\end{frame}
+
+
+
+
+\begin{frame}[fragile]{QR with Column Pivoting}
+
+\begin{itemize}
+\item QR with column pivoting provides a way to approximately solve rank-deficient least squares problems and compute the truncated SVD
+
+\lgcond{
+\begin{itemize}
+\item We seek a factorization of the form $\B Q \B R = \B A \B P$ where $\B P$ is a permutation matrix that permutes the columns of $\B A$
+\sitem For $n \times n$ matrix $\B A$ of rank $r$, the bottom $r\times r$ block of $\B R$ will be $\B 0$
+\sitem To solve least squares, we can solve the rank-deficient triangular system $\B R \B y = \B Q^T \B b$ then compute $\B x = \B P \B y$
+\end{itemize}
+}
+
+\item A pivoted QR factorization can be used to compute a rank-$r$ approximation
+
+\lgcond{
+\begin{itemize}
+\item To compute QR with column pivoting,
+  \begin{enumerate}
+  \sitem pivot the column of largest norm to be the leading column,
+  \item form and apply a Householder reflector $\B H$ so that $\B H \B A = \begin{bmatrix} \alpha & \B b \\ \B 0 & \B B \end{bmatrix}$,
+  \item proceed recursively (go back to step 1) to pivot the next column and factorize $\B B$
+  \end{enumerate}
+\sitem Computing the SVD of the first $r$ columns of $\B A \B P^T$ generally (but not always) gives the truncated SVD
+\sitem Halting after $r$ steps leads to a cost of $O(n^2r)$
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+
+%\end{document}

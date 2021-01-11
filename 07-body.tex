@@ -1,0 +1,560 @@
+%%\documentclass[handout]{beamer}
+%\documentclass[aspectratio=169,13pt]{beamer}
+
+%\input{./preamble}
+
+\subtitle{Interpolation}
+
+\date{}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Interpolation and Vandermonde Systems}
+
+\begin{frame}{Interpolation}
+
+\begin{itemize}
+\item Given $(t_1,y_1),\ldots ,(t_m,y_m)$ with \coloremph{nodes} $t_1<\cdots < t_m$ an \coloremph{interpolant} $f$ satisfies:
+
+\lgcond{
+   \[f(t_i)=y_i \quad \forall i.\]
+
+\begin{itemize}
+\item The number of possible interpolant functions is infinite, but there is a unique degree $m-1$ polynomial interpolant.
+\sitem Error of interpolant can be quantified with knowledge of true function $g$, (e.g. by considering $\max_{t\in[t_1,t_m]} |f(t)-g(t)|$) .
+\end{itemize}
+}
+
+\item Interpolant is usually constructed as linear combinations of \coloremph{basis functions} $\{\phi_j\}_{j=1}^n=\phi_1,\ldots,\phi_n$ so $f(t)=\sum_j x_j\phi_j(t)$.
+
+
+\lgcond{
+\begin{itemize}
+\sitem Interpolant exists if $n \geq m$ and is unique for a given basis if $n=m$.
+\mitem \coloremph{Vandermonde matrix} $\B A = \B V(\B t,\{\phi_j\}_{j=1}^n)$ satisfies $a_{ij}=\phi_j(t_i)$ so $\B A \B x = \B y$.
+\mitem Coefficients $\B x$ of interpolant are obtained by solving \coloremph{Vandermonde system} $\B A\B x =\B y$ for $\B x$.
+%\sitem Interpolant can be evaluated at any point $t$ by computing $y=\B V(\B t,\{\phi_j\}_{j=1}^n)$ then $\B y=\B B \B x$.
+\end{itemize}
+}
+
+\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}{Polynomial Interpolation}
+
+\urcornerlinkinclass{inclass-interpolation-monomial}{Interpolation in Monomial Basis}
+
+\begin{itemize}
+\item The choice of \coloremph{monomials} as basis functions, $\phi_j(t)=t^{j-1}$ yields a degree $n-1$ polynomial interpolant:
+
+
+\lgcond{
+\begin{itemize}
+\sitem Corresponding Vandermonde matrix $\B A = \B V(\B t, \{t^{j-1}\}_{j=1}^n)$ satisfies $a_{ij}=t_i^{j-1}$.
+\end{itemize}
+}
+
+\item Polynomial interpolants are easy to evaluate and do calculus on:
+%They are easy to differentiate, integrate, and evaluate, e.g. via Horner's rule
+\lgcond{
+\begin{itemize} 
+\sitem \coloremph{Horner's rule} requires $n$ products and $n-1$ additions:
+  \[f(t) = x_1 + t(x_2 + t(x_3 +\ldots )).\]
+\item $O(n)$ work to determine new coefficients for differentiation and integration.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}{Solving a Vandermonde System}
+%
+%\begin{itemize}
+%\item Naively, polynomial interpolation requires $O(n^3)$ work for solving the linear system $\B A \B x = \B y$:
+%
+%\mdcond{
+%Gaussian elimination of $\B A$ requires $O(n^3)$ work.
+%By comparison evaluating the polynomial is only $O(n)$ work.
+%}
+%
+%\item 
+%Polynomial interpolants are easy to evaluate and do calculus on:
+%They are easy to differentiate, integrate, and evaluate, e.g. via Horner's rule
+%\lgcond{
+%  \[f(t) = x_1 + t(x_2 + t(x_3 +\ldots ))\]
+%\begin{itemize} 
+%\item Differentiation and integration require $m$ products.
+%\mitem Horner's rule for evaluation requires $m$ products and $m$ additions
+%\end{itemize}
+%}
+%
+%\end{itemize}
+%
+%\end{frame}
+
+
+\section{Conditioning of Interpolation}
+
+\begin{frame}{Conditioning of Interpolation}
+
+\urcornerlinkdemo{07-interpolation}{Monomial interpolation}
+
+\begin{itemize}
+\item Conditioning of interpolation matrix $\B A$ depends on basis functions and coordinates $t_1,\ldots, t_m$:
+
+\lgcond{
+\begin{itemize}
+\item $t_i$ defines the $i$th row, so columns tend to be nearly linearly-dependent if $t_i\approx t_{i+1}$
+\sitem $\phi_j$ defines the $j$th column, so rows tend to be nearly linearly-dependent if $\phi_j$ is nearly in the span of the other basis functions: $\mathop{span}(\{\phi_i\}_{i=1,i\neq j}^n)$
+\end{itemize}
+}
+
+\item The Vandermonde matrix tends to be ill-conditioned:
+\lgcond{
+\begin{itemize} 
+\item Monomials of increasing degree increasingly resemble one-another, so rows of $\B A$ become nearly the same, and consequently $\kappa(\B A)$ grows.
+\mitem The conditioning can be improved somewhat by shifting and scaling points so that each $t_i\in [-1,1]$.
+\mitem Consequently, we will consider alternative polynomial bases, seeking to improve the efficiency and conditioning associated with the Vandermonde matrix.
+\mitem However, generally, we will obtain the {\it same} polynomial interpolant. To improve interpolant quality (e.g. avoid oscillations), the nodes and not the basis functions need to be changed.
+\end{itemize}
+}
+
+\end{itemize}
+
+
+\end{frame}
+
+\section{Efficient Bases}
+
+\begin{frame}{Lagrange Basis}
+
+\begin{itemize}
+\item $n$-points fully define the unique $(n-1)$-degree polynomial interpolant in the \coloremph{Lagrange basis}:
+\lgcond{
+\[\phi_j(t) = \underbrace{\prod_{k=1,k\neq j}^n (t-t_k)}_{\textbf{num}}/\underbrace{\prod_{k=1,k\neq j}^n (t_j-t_k)}_{\textbf{den}}\]
+\begin{itemize}
+\item Note that \textbf{den} is never $0$,
+\sitem \textbf{num} is $0$ whenever $t=t_k$ for some $k$, so $\phi_j(t_i)=0$ if $i \neq j$,
+\sitem when $t=t_j$ then \textbf{num} and \textbf{dem} are the same, so $\phi_j(t_j)=1$,
+\sitem consequently, the Lagrange Vandermonde matrix $\B V(\B t, \{\phi_j\}_{j=1}^n) = \B I$.
+\end{itemize}
+}
+
+\item Lagrange polynomials yield an ideal Vandermonde system, but the basis functions are hard to evaluate and do calculus on:
+\lgcond{
+\begin{itemize} 
+\item Evaluation requires $O(n^2)$ work naively and may incur cancellation error.
+\mitem Differentiation and integration are also harder than with monomials.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Newton Basis}
+
+\begin{itemize}
+\item The \coloremph{Newton basis} functions $\phi_j(t) = \prod_{k=1}^{j-1}(t-t_k)$ with $\phi_1(t)=1$ seek the best of monomial and Lagrange bases:
+
+\lgcond{
+\begin{itemize}
+\sitem Evaluation with Newton basis can use recurrence,
+\[\phi_j(t) = \phi_{j-1}(t)(t-t_j).\]
+\item Divided difference recurrence enables fast computation of coefficients.
+\end{itemize}
+}
+
+\item The Newton basis yields a triangular Vandermonde system:
+
+\lgcond{
+\begin{itemize}
+\sitem Note that $a_{ij}=\phi_j(t_i)=0$ for all $i<j$, so $\B A$ is lower-triangular. 
+\mitem Given $\B A$, can use back-substitution to obtain the solution in $O(n^2)$ work.
+\mitem Can use evaluation recurrence to compute $\B A$ with $O(n^2)$ work, but divided difference recurrence is more stable than forming $\B A$.
+\end{itemize}
+}
+
+
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}{Recurrences for Newton Basis}
+%
+%\begin{itemize}
+%\item The Newton basis functions $\phi_j(t) = \prod_{k=1}^{j-1}(t-t_k)$ can be evaluated at $t$ with $O(n)$ work using a simple recurrence:
+%
+%\mdcond{
+%\[\phi_j(t) = \phi_{j-1}(t)(t-t_j)\]
+%}
+%
+%\item A recurrence known as the divided-differences formula gives a stable way of efficiently computing the coefficients $\B x$:
+%
+%\lgcond{
+%\[x_i = l_{i1} \quad \text{where} \quad l_{ij}=\frac{l_{i,j+1} - l_{i-1,j}}{t_i-t_{j}} \ \text{for} \ i>j \quad \text{and} \quad l_{ii}= y_i\]
+%\begin{itemize}
+%\item We can define $x_i=l_{i1}=f[t_1,\ldots, t_i]$ and generally $l_{ij}=f[t_j,\ldots, t_i]$.
+%\mitem This recurrence also implies that the Newton coefficients can be constructed incrementally by appending new rows to the bottom of $\B L$.
+%\end{itemize}
+%}
+%\mdcond{}
+%
+%\end{itemize}
+%
+%\end{frame}
+\section{Orthogonal Polynomials}
+
+\begin{frame}{Orthogonal Polynomials}
+
+
+\begin{itemize}
+\item Recall that good conditioning for interpolation is achieved by constructing a well-conditioned Vandermonde matrix, which is the case when the columns (corresponding to each basis
+function) are orthonormal. To construct robust basis sets, we introduce a notion of \coloremph{orthonormal functions}:
+
+\lgcond{
+\begin{itemize}
+\sitem To compute overlap between basis functions, use a $w$-weighted integral as inner product,
+\[\langle p, q\rangle_w = \int_{-\infty}^{\infty} p(t)q(t)w(t) dt.\]
+\item $\{\phi_i\}_{i=1}^n$ are orthonormal with respect to the above inner product if
+\[\langle \phi_i, \phi_j\rangle_w =\delta_{ij}= \begin{cases} 1 & \text{if} \ i=j \\ 0 & \text{otherwise} \end{cases}. \]
+\item The corresponding norm is given by $||f|| = \sqrt{\langle f, f\rangle_w}$.
+\end{itemize}
+}
+\lgcond{
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Legendre Polynomials}
+
+\urcornerlinkdemo{07-interpolation}{Orthogonal Polynomials}
+
+\begin{itemize}
+\item The Gram-Schmidt orthogonalization procedure can be used to obtain an orthonormal basis with the same span as any given arbitrary basis:
+
+\lgcond{
+Given orthonormal functions $\{\hat{\phi}_i\}_{i=1}^{k-1}$ obtain $k$th function from $\phi_k$ via
+\[\hat{\phi}_k(t) = \frac{\hat{\psi}_k(t)}{||{\hat{\psi}_k}||}, \quad \psi_k(t)= \phi_k(t) - \sum_{i=1}^{k-1} \langle \phi_k(t), \hat{\phi}_i(t)\rangle_w \hat{\phi}_i(t)\]
+}
+\item The \coloremph{Legendre polynomials} are obtained by Gram-Schmidt on the monomial basis, with
+$w(t)=\begin{cases} 1 : -1 \leq t \leq 1 \\ 0 : \text{otherwise} \end{cases}$ and normalized so $\hat{\phi}_i(1)=1$.
+
+\lgcond{
+For example, $\{\hat{\phi}_i(t)\}_{i=1}^{3}=\{1,t,(3t^2-1)/2\}$ since
+\begin{align*}
+\psi_1(t) &= 1, \quad
+\psi_2(t) = t - \frac{1}{2}\int_{-1}^1 t dt= t \\
+\psi_3(t) &= t^2 - \frac{1}{2}\int_{-1}^1 t^2 dt - t \int_{-1}^1 t^3 dt   = t^2 - 1/3 
+\end{align*}
+}
+
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}{Basis Orthogonality and Conditioning}
+%
+%\begin{itemize}
+%\item To obtain perfectly conditioned Vandermonde system, want inner products of different columns to be zero:
+%
+%\lgcond{
+%\[\langle \B{a}_i, \B{a}_j \rangle = \sum_{k=1}^n \phi_i(t_k)\phi_j(t_k) = \delta_{ij}\]
+%}
+%
+%\item These inner products should be close to zero, if they are a suitable quadrature rule for our weighted functional inner product:
+%
+%\lgcond{
+%\[\sum_{k=1}^n \phi_i(t_k)\phi_j(t_k) \approx \int_{-\infty}^{\infty} w(t) \phi_i(t)\phi_j(t) dt\]
+%For example above holds as equality if we choose
+%\[w(t) = \begin{cases} \infty & : t = t_k \ \text{for some} \  k \\ 0 & : \text{otherwise}\end{cases} \]
+%}
+%
+%\end{itemize}
+%
+%\end{frame}
+
+\section{Chebyshev Interpolation}
+
+\begin{frame}{Chebyshev Basis}
+
+\urcornerlinkdemoinclass{07-interpolation}{Chebyshev interpolation}{inclass-chebyshev}{Chebyshev Interpolation}
+
+\begin{itemize}
+\item \coloremph{Chebyshev polynomials} $\phi_j(t) = \cos((j-1) \arccos(t))$ and \coloremph{Chebyshev nodes} $t_i = \cos\left(\frac{2i-1}{2n}\pi\right)$ provide a way to pick \coloremph{nodes} $t_1,\ldots, t_n$ along with a basis, to yield perfect conditioning:
+
+\lgcond{
+\begin{itemize}
+\item They satisfy the recurrence $\phi_1(t)=1, \phi_2(t)=t, \phi_{i+1}(t) = 2t\phi_i(t)-\phi_{i-1}(t)$
+\sitem The Chebyshev basis functions are orthonormal with respect to 
+\[w(t)=\begin{cases} 1/(1-t^2)^{1/2} &: -1 \leq t \leq 1 \\ 0 &: \text{otherwise} \end{cases}.\]
+\item The Chebyshev nodes ensure orthogonality of the columns of $\B A$, since
+\begin{align*}
+\sum_{k=1}^n \phi_l(t_k)\phi_j(t_k) &= \sum_{k=1}^n \cos\left(\frac{(l-1)(2k-1)}{2n}\pi\right)\cos\left(\frac{(j-1)(2k-1)}{2n}\pi\right) 
+%&=2\sum_{k=1}^n e^{i\frac{(l-j)(2k-1)}{2n}\pi}=\begin{cases} 2 : l=j \\ 0 : \text{otherwise}\end{cases}
+\end{align*}
+is zero whenever $j\neq l$ due to periodicity of the summands.
+\end{itemize}
+}
+\lgcond{}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Chebyshev Nodes Intuition}
+
+\urcornerlinkdemo{07-interpolation}{Jump with Chebyshev Nodes}
+
+{
+
+\centering
+\includegraphics[width=2.4in]{diagrams/cheb_funs}
+\includegraphics[width=2.2in]{diagrams/chebyshev_nodes}
+
+}
+\begin{itemize}
+\mitem Note \coloremph{equi-oscillation} property, successive extrema of $T_k=\phi_k$ have the same magnitude but opposite sign.
+
+%\mdcond{}
+
+\mitem Set of $k$ Chebyshev nodes of are given by zeros of $T_k$ and are abscissas of points uniformly spaced on the unit circle.
+
+%\mdcond{}
+\end{itemize}
+
+\end{frame}
+
+
+
+%\begin{frame}{Orthogonal Polynomials and Recurrences}
+%
+%\begin{itemize}
+%
+%\sitem The Newton polynomials could be obtained by a two-term recurrence
+%
+%\mitem Legendre and Chebyshev polynomials also satisfy three-term recurrence, for Chebyshev
+%\[\phi_{i+1}(t) = 2t\phi_i(t)-\phi_{i-1}(t)\]
+%
+%\mitem In fact all orthogonal polynomials satisfy some recurrence of the form,
+%
+%\lgcond{
+%\[\phi_{i+1}(t) = (\alpha_kt+\beta_k)\phi_i(t)-\gamma_k \phi_{i-1}(t)\]
+%
+%}
+%
+%\end{itemize}
+%
+%
+%\end{frame}
+\section{Error in Interpolation}
+
+%\begin{frame}{Error in Interpolation}
+%
+%
+%Given degree $2$ polynomial interpolant $\tilde{f}$ the error $E(t)=f(t)-\tilde{f}(t)$ has $2$ zeros at the nodes $t_1,\ldots, t_{2}$ and there exist $y_1, y_2$ such that
+%\begin{align}
+%E(t) &= \int_{t_1}^t \int_{y_1}^{w_0}\int_{y_2}^{w_1} f'''(w_1) dw_1  dw_0 dy_1 \label{eq:interp_ind}
+%\end{align}
+%\lgcond{
+%\begin{align}
+%E(t) &= E(t_1) + \int_{t_1}^t E'(w_0)  dw_0  \label{eq:interp_exp}
+%\end{align}
+%Now note that for each of $n-1$ consecutive pairs $t_i$, $t_{i+1}$ we have
+%\[\int_{t_i}^{t_{i+1}} E'(t) dt = E(t_{i+1})-E(t_i) =  0\]
+%and so there are $z_i\in (t_i,t_{i+1})$ such that $E'(z_i)=0$.
+%By inductive hypothesis
+%\begin{align}
+%E'(w_0) &= \int_{z_1}^{w_0} \int_{y_2}^{w_1}\cdots \int_{y_{n}}^{w_{n-1}} f^{(n+1)}(w_n) dw_n \cdots  dw_1  \label{eq:interp_drv}
+%\end{align}
+%Substituting \eqref{eq:interp_drv} into \eqref{eq:interp_exp}, we obtain \eqref{eq:interp_ind} with $y_1=z_1$.
+%}
+%\lgcond{
+%}
+%\end{frame}
+%
+
+\begin{frame}{Error in Interpolation}
+
+
+We show by induction that given degree $n$ polynomial interpolant $\tilde{f}$ of $f$ the error $E(t)=f(t)-\tilde{f}(t)$ has $n$ zeros $t_1,\ldots, t_{n}$ and there exist $y_1,\ldots, y_n$ so
+\begin{align}
+E(t) &= \int_{t_1}^t \int_{y_1}^{w_0}\cdots \int_{y_n}^{w_{n-1}} f^{(n+1)}(w_n) dw_n \cdots  dw_0 \label{eq:interp_ind}
+\end{align}
+\lgcond{
+\vspace{-.1in}
+\begin{align}
+E(t) &= E(t_1) + \int_{t_1}^t E'(w_0)  dw_0  \label{eq:interp_exp}
+\end{align}
+Now note that for each of $n-1$ consecutive pairs $t_i$, $t_{i+1}$ we have
+\[\int_{t_i}^{t_{i+1}} E'(t) dt = E(t_{i+1})-E(t_i) =  0\]
+and so there are $n-1$ zeros $z_i\in (t_i,t_{i+1})$ such that $E'(z_i)=0$. \\
+The inductive hypothesis on $E'$ then gives
+\begin{align}
+E'(w_0) &= \int_{z_1}^{w_0} \int_{y_2}^{w_1}\cdots \int_{y_{n}}^{w_{n-1}} f^{(n+1)}(w_n) dw_n \cdots  dw_1  \label{eq:interp_drv}
+\end{align}
+Substituting \eqref{eq:interp_drv} into \eqref{eq:interp_exp}, we obtain \eqref{eq:interp_ind} with $y_1=z_1$.
+}
+\lgcond{
+}
+\end{frame}
+
+\begin{frame}[fragile]{Interpolation Error Bounds}
+
+\urcornerlinkdemo{07-interpolation}{Interpolation Error}
+
+\begin{itemize}
+\item Consequently, polynomial interpolation satisfies the following error bound:
+\lgcond{
+\[|E(t)| \leq \frac{ \max_{s\in[t_1,t_n]}|f^{(n+1)}(s)|}{n!}\prod_{i=1}^n(t-t_i) \quad \text{for} \quad t\in[t_1,t_n]\]
+
+Note that the Choice of Chebyshev nodes decreases this error bound at the extrema, equalizing it with nodes that are in the middle of the interval.
+}
+
+\item Letting $h=t_n-t_1$ (often also achieve same for $h$ as the node-spacing $t_{i+1}-t_i$), we obtain
+\lgcond{
+\[|E(t)| \leq \frac{ \max_{s\in[t_1,t_n]}|f^{(n+1)}(s)|}{n!}h^n= O(h^n) \quad \text{for} \quad t\in[t_1,t_n]\]
+
+Suggests that higher-accuracy can be achieved by 
+\begin{itemize}
+\item adding more nodes (however, high polynomial degree can lead to unwanted oscillations)
+\item shrinking interpolation interval (suggests piecewise interpolation)
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+\section{Piecewise Interpolation}
+
+\begin{frame}{Piecewise Polynomial Interpolation}
+
+\urcornerlinkdemo{07-interpolation}{Composite Gauss Interpolation Error}
+
+\begin{itemize}
+\item The $k$th piece of the interpolant is typically chosen as polynomial on $[t_i,t_{i+1}]$
+
+\lgcond{
+\begin{itemize}
+\sitem Typically low-degree polynomial pieces used, e.g. cubic.
+\sitem Degree of piecewise polynomial is the degree of its pieces.
+\sitem Continuity is automatic, differentiability can be enforced by ensuring derivative of pieces is equal at knots (nodes at which pieces meet).
+\[
+f(t) = \begin{cases} t \in [t_1,t_2] & : f_1(t) \\
+& \vdots \\
+t \in [t_{n-1},t_n] & : f_{n-1}(t)
+\end{cases}, %f_1(t_1)=y_1,f_{n-1}(t_n)=y_n 
+\forall i\in [2,n-1], f_{i-1}(t_i) = f_{i}(t_i) = y_i
+%, f_i'(t_i) = f_{i+1}'(t_i)
+\]
+\end{itemize}
+}
+
+\item \coloremph{Hermite} interpolation ensures consecutive interpolant pieces have same derivative at each \coloremph{knot} $t_i$:
+
+\lgcond{
+\begin{itemize}
+\sitem Hermite interpolation ensures differntiability of the interpolant $\forall i\in [2,n-1], f_{i-1}'(t_i) = f_{i}'(t_i)$
+%\[
+%f(t) = \begin{cases} t \in [t_1,t_2] & : f_1(t) \\
+%& \vdots \\
+%t \in [t_{n-1},t_n] & : f_{n-1}(t)
+%\end{cases}, f_1(t_1)=y_1,f_{n-1}(t_n)=y_n, \\ 
+%\forall i\in [2,n-1], f_i(t_i) = f_{i+1}(t_i) = y_i, f_i'(t_i) = f_{i+1}'(t_i)
+%\]
+\sitem Various further constraints can be placed on the interpolant if its degree is at least 3, since otherwise the system is underdetermined.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Spline Interpolation}
+
+\begin{itemize}
+\item A \coloremph{spline} is a $(k-1)$-time differentiable piecewise polynomial of degree $k$:
+
+\lgcond{
+Cubic splines are different from Hermite cubics
+\begin{itemize}
+\item $2(n-1)$ equations needed to interpolate data
+\item $n-2$ to ensure continuity of derivative
+\item $n-2$ to ensure continuity of second derivative for cubic splines
+\end{itemize}
+Overall there are $4(n-1)$ coefficients in the interpolant.
+}
+
+\item The resulting interpolant coefficients are again determined by an appropriate \coloremph{generalized Vandermonde system}:
+
+\lgcond{
+A \coloremph{natural spline} obtains $4(n-1)$ constraints by forcing $f''(t_1)=f''(t_n)=0$.
+Given cubic pieces $p(t)$ and $q(t)$ and nodes $t_1,t_2,t_3$ (where $t_2$ is a knot) %$= \sum_{i=0}^3 \alpha_i t^i, q(t) = \sum_{i=0}^3 \beta_i t^i$ 
+the generalized Vandermonde system for a two-piece cubic natural spline consists of 8 equations with 8 unknowns:
+%looks like (3 similar constraints on $\beta$ not shown)
+% has the nonzero structure for the first four rows, which determinine the $\alpha_i$ components
+\begin{alignat*}{2}
+p(t_1) = y_1,& \quad p''(t_1) = 0  && \\
+p(t_2) = y_2, \quad q(t_2) = y_2,& \quad p'(t_2) = q'(t_2),&& \quad p''(t_2) = q''(t_2) \\
+q(t_3) = y_3,&\quad q''(t_3) = 0  &&
+%q(t_1) &= y_1, p(t_2) = y_2, p(t_3) = y_3 \\
+\end{alignat*}
+%\[\begin{bmatrix}
+%1 & t_1 & t_1^2 & t_1^3 & 0 & 0 & 0 & 0 \\
+%1 & t_2 & t_2^2 & t_2^3 & 0 & 0 & 0 & 0 \\
+%0  & 1 & 2t_2 & 3t_2^2 & 0 & -1 & -2t_2 & -3t_2^2 \\
+%0  & 0  & 2 & 6t_2 & 0 & 0 & -2 & -6t_2 \\
+%0  & 0  & 2 & 6t_1 & 0 & 0 & 0 & 0 \\
+%\end{bmatrix} \begin{bmatrix} \alpha_0 & \cdots & \alpha_3 & \beta_0 & \cdots & \beta_3\end{bmatrix}^T = \begin{bmatrix} y_1 \\ y_2 \\ 0 \\ 0 \\ 0\end{bmatrix}\]
+
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{B-Splines}
+
+\coloremph{B-splines} provide an effective way of constructing splines from a basis:
+\begin{itemize}
+\sitem The basis functions can be defined recursively with respect to degree:
+
+\lgcond{
+\begin{alignat*}{2}
+v^k_i(t) &= \frac{t-t_i}{t_{i+k}-t_i}, \quad && \phi_i^0(t) = \begin{cases} 1 & t_i \leq t \leq t_{i+1} \\ 0 & \text{otherwise} \end{cases}\\
+\phi^k_i(t) &= v^k_i(t)\phi^{k-1}_i(t)+(1-v^k_{i+1}(t))\phi^{k-1}_{i+1}(t), \quad && f(t) = \sum_{i=1}^n c_i\phi^k_i(t)
+\end{alignat*}
+}
+\item $\phi^1_i$ is a linear hat function that increases from $0$ to $1$ on $[t_i,t_{i+1}]$ and decreases from $1$ to $0$ on  $[t_{i+1},t_{i+2}]$.
+\sitem $\phi^k_i$ is  is positive on $[t_i,t_{i+k+1}]$ and zero elsewhere.
+
+\sitem The B-spline basis spans all possible splines of degree $k$ with nodes $\{t_i\}_{i=1}^n$.
+
+\sitem The B-spline basis  coefficients are determined by a Vandermonde system that is lower-triangular and banded (has $k$ subdiagonals), and need not contain differentiability constraints, since $f(t)$ is a sum of $\phi^k_i$s.
+
+
+\end{itemize}
+
+\end{frame}
+
+
+
+
+
+
+
+
+
+
+%\end{document}

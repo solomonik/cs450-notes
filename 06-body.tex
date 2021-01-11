@@ -1,0 +1,1113 @@
+%%\documentclass[handout]{beamer}
+%\documentclass[aspectratio=169,13pt]{beamer}
+
+%\input{./preamble}
+
+\subtitle{Numerical Optimization}
+
+\date{}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Numerical Optimization Problems}
+
+\subsection{Constrained and Unconstrained Optimization}
+
+\begin{frame}{Numerical Optimization}
+
+\begin{itemize}
+\item Our focus will be on \coloremph{continuous} rather than \coloremph{combinatorial} optimization:
+\[\min_{\B x} f(\B x)\quad \text{subject to} \quad \B g(\B x) = \B 0 \quad \text{and} \quad \B{h}(\B x) \leq \B 0\]
+
+\lgcond{
+where $f\in \mathbb{R}^n\to \mathbb{R}$ is assumed to be differentiable.
+\begin{itemize}
+\sitem Without the constraints, i.e. with $\B g = \B 0$ and $\B h = \B 0$, the problem is \coloremph{unconstrained}.
+\sitem With constraints, the \coloremph{constrained} optimization problem restricts the solution to elements of the \coloremph{feasible region}: $\{\B x:\B g(\B x) = \B 0 \ \text{and} \ \B{h}(\B x) \leq \B 0\}$.
+\end{itemize}
+}
+
+\item We consider linear, quadratic, and general nonlinear optimization problems:
+
+\lgcond{
+\begin{itemize}
+\item If $f$, $\B g$, and $\B h$ are affine (linear and constant terms only) then we have \coloremph{linear programming} problem.
+\sitem If $f$ is quadratic while $\B g$ and $\B h$ are linear, then we have a \coloremph{quadratic programming} problem, for which specialized methods exist.
+\sitem Generally, we have a \coloremph{nonlinear programming} problem.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+\subsection{Existence and Uniqueness of Solutions}
+
+\begin{frame}{Local Minima and Convexity}
+
+\begin{itemize}
+\item Without knowledge of the analytical form of the function, numerical optimization methods at best achieve convergence to a \coloremph{local} rather than \coloremph{global} minimum:
+
+\lgcond{
+If the input domain is infinite or the global minimum is in an infinitesimally narrow trough, it may be impossible to find the global minimum in finite time.
+}
+
+\item A set is \coloremph{convex} if it includes all points on any line, while a function is (strictly) convex if its (unique) local minimum is always a global minimum:
+
+\lgcond{
+\begin{itemize}
+\item Set $S$ is convex if \[\forall \B x,\B y \in S,\quad \alpha \in [0,1], \quad \alpha \B x + (1-\alpha)\B y \in S.\]
+\item Function $f$ is convex if \[f(\alpha \B x + (1-\alpha)\B y)\leq \alpha f(\B x) + (1-\alpha)f(\B y).\]
+\item A function may have a unique global minima but not be convex.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Existence of Local Minima}
+
+\begin{itemize}
+\item \coloremph{Level sets} are all points for which $f$ has a given value, \coloremph{sublevel sets} are all points for which the value of $f$ is less than a given value:
+
+\lgcond{
+\[L(z) = \{ \B x: f(\B x)=z\}\]
+\[S(z) = \{ \B x: f(\B x)\leq z\}\]
+}
+
+\item If there exists a closed and bounded sublevel set in the domain of feasible points, then $f$ has has a global minimum in that set:
+
+\lgcond{
+Need a value $z$ such that $S(z)$ has finite size, is contiguous, and includes its own boundary.
+}
+
+\end{itemize}
+
+
+\end{frame}
+
+\subsection{Properties of Local Minima}
+
+\begin{frame}{Optimality Conditions}
+
+\begin{itemize}
+\item If $\B x$ is an interior point in the feasible domain and is a local minima, 
+\[\nabla f(\B x) = \begin{bmatrix} \frac{df}{dx_1}(\B x) & \cdots \frac{df}{dx_n}(\B x)\end{bmatrix}^T = \B 0:\]
+
+\lgcond{
+\begin{itemize}
+\item If $\frac{df}{dx_i}(\B x) < 0$ an infinitesimal increment to $x_i$ improves the solution, 
+\sitem if $\frac{df}{dx_i}(\B x) > 0$
+an infinitesimal decrement to $x_i$ improves the solution.
+\end{itemize}
+}
+\item \coloremph{Critical points} $\B x$ satisfy $\nabla f(\B x) = \B 0$ and can be minima, maxima, or saddle points:
+
+\lgcond{
+For scalar function $f$, can distinguish the three by considering sign of $f''(x)$.
+}
+
+
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}{Hessian Matrix}
+
+\begin{itemize}
+\item To ascertain whether a critical point $\B x$, for which $\nabla f(\B x) = \B 0$, is a local minima, consider the \coloremph{Hessian matrix}:
+\mdcond{
+\[\B{H}_f(\B x) = \B{J}_{\nabla f}(\B x) = \begin{bmatrix} 
+                                  \frac{d^2 f}{dx_1^2}(\B x) & \cdots & \frac{d^2 f}{dx_1dx_n}(\B x) \\
+                                  \vdots & \ddots & \vdots  \\
+                                  \frac{d^2 f}{dx_ndx_1}(\B x) & \cdots & \frac{d^2 f}{dx_n^2}(\B x) \end{bmatrix}\]
+
+
+The Hessian matrix is always symmetric.
+}
+
+\item If $\B x^*$ is a minima of $f$, then $\B{H}_f(\B x^*)$ is positive semi-definite:
+
+\lgcond{
+If $\B{H}_f(\B x^*)$ is not positive semi-definite, there exists normalized vector $\B{s}$ such that $\B s^T \B{H}_f(\B x^*)\B s < 0$, which means that
+for a sufficiently small $\alpha$, $\B{\hat{x}} = \B x^* + \alpha \B s$ will have be a better solution, $f(\B{\hat{x}})<f(\B{x^*})$,
+since the gradient is zero at $\B x^*$ and decreases for an infinitesimal perturbation of $\B x^*$ in the direction $\B s$.
+}
+\mdcond{}
+
+
+\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}{Optimality on Feasible Region Border}
+
+\begin{itemize}
+\item Given an equality constraint $\B g(\B x)=\B 0$, % implies that a minimum $\B x^*$ must satisfy $\B g(\B x^*)=\B 0$.
+      it is no longer necessarily the case that $\nabla f(\B x^*) =\B 0$.
+      Instead, it may be that directions in which the gradient decreases lead to points outside the feasible region:
+
+\[\exists \B \lambda\in\mathbb{R}^n, \quad -\nabla f(\B x^*) = \B J^T_{\B g}(\B x^*) \B \lambda\]
+
+\lgcond{
+\begin{itemize}
+\item $\B \lambda$ are referred to as the Lagrange multipliers.
+\sitem This condition implies that at $\B x^*$, the direction in which $f$ decreases is in the span of directions moving along which would exit the feasible region.
+\end{itemize}
+}
+
+\item Such \coloremph{constrained minima} are critical points of the Lagrangian function $\mathcal{L}(\B x, \B \lambda) = f(\B x) + \B \lambda^T\B g(\B x)$, so they satisfy: %, described by the nonlinear equation,
+
+\[\nabla \mathcal{L}(\B x^*, \B \lambda) = \begin{bmatrix} \nabla f(\B x^*) + \B J_{\B g}^T(\B x^*) \B \lambda \\ \B g(\B x^*)\end{bmatrix} = \B 0\]
+
+\lgcond{
+Seeking $\B \lambda^*$ to obtain a function $k(\B x) = \mathcal{L}(\B x, \B \lambda^*)$ with maximum global minimum is the \coloremph{dual optimization problem}.
+}
+
+
+\end{itemize}
+
+
+\end{frame}
+
+\subsection{Conditioning of Minima}
+
+\begin{frame}{Sensitivity and Conditioning}
+
+\begin{itemize}
+\item The condition number of solving a nonlinear equations is $1/f'(x^*)$, however for a minimizer $x^*$, we have $f'(x^*)=0$, so conditioning of optimization is inherently bad:
+
+\lgcond{Consider perturbation of function values for a function that changes slowly near the minimum.}
+
+\item To analyze worst case error, consider how far we have to move from a root $\B x^*$ to perturb the function value by $\epsilon$:
+
+\lgcond{
+\[\epsilon = f(x^*+h)-f(x^*)=  \underbrace{f'(x^*)h}_{0} + \frac{1}{2}f''(x^*)h^2 + O(h^3)\]
+\begin{itemize}
+\item so the function value changes by $\frac{1}{2}f''(x^*)h^2$, which implies we need $h=O(\sqrt{\epsilon})$,
+\sitem  a perturbation to the function value in the $k$th significant digit, could result in the solution changing in the $k/2$th significant digit.
+\end{itemize}
+}
+%For an absolute perturbation to the function of size $\epsilon$, we can check how far away If we perturb $x^*$ by $h^*$
+
+\end{itemize}
+
+\end{frame}
+
+\subsection{Algorithms for 1D Optimization}
+
+\begin{frame}{Golden Section Search}
+
+\urcornerlinkdemo{06-optimization}{Golden Section Proportions}
+
+\begin{itemize}
+\item Given bracket $[a,b]$ with a unique minimum ($f$ is \coloremph{unimodal} on the interval), \coloremph{golden section search} considers consider points $f(x_1),f(x_2)$, $a<x_1<x_2<b$ and discards subinterval $[a,x_1]$ or $[x_2,b]$:
+
+\lgcond{
+\begin{itemize}
+\sitem If a function is strictly convex and bounded on $[a,b]$, it is unimodal on that interval, but a unimodal function may be non-convex.
+\sitem Because the function is unimodal, if we have $f(x_1)<f(x_2)$ then the unique local minima $f$ in $[a,b]$ has to be in the interval $[a,x_2]$.
+\sitem So, if $f(x_1)<f(x_2)$ can restrict search to $[a,x_2]$ and otherwise to $[x_1,b]$.
+\end{itemize}
+}
+
+\item Since one point remains in the interval, golden section search selects $x_1$ and $x_2$ so one of them can be effectively reused in the next iteration:
+
+\lgcond{
+\begin{itemize}
+\sitem For example, when $f(x_1)>f(x_2)$,  $x_2$ is inside $[x_1,b]$ and we would like $x_2$ to serve as the $x_1$ for the next iteration.
+\sitem To ensure this, and minimize resulting interval length, we pick $x_2=a+(b-a)(\sqrt{5}-1)/2$ and $x_1=b-(b-a)(\sqrt{5}-1)/2$.
+\sitem Consequently, the convergence of golden secetion search is linear with constant $(\sqrt{5}-1)/2$ per function evaluation.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Newton's Method for Optimization}
+
+\urcornerlinkdemo{06-optimization}{Newton's Method in 1D}
+
+\begin{itemize}
+\item At each iteration, approximate function by quadratic and find minimum of quadratic function:
+
+\lgcond{
+Pick quadratic function $\hat{f}$ as first three terms of Taylor expansion of $f$ about $x_k$, matching value and first two derivatives of $f$ at $x_k$.
+}
+
+\item The new approximate guess will be given by $x_{k+1}-x_k = -f'(x_k)/f''(x_k)$:
+
+\lgcond{
+\[f(x) \approx \hat{f}(x) = f(x_k)+f'(x_k)(x-x_k) + \frac{1}{2}f''(x_k)(x-x_k)^2\]
+since the function is quadratic, we can find its unique critical point to find its minima,
+\[\hat{f}'(x_{k+1}) = f'(x_k) + f''(x_k)(x_{k+1}-x_k) = 0.\]
+}
+
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}{Successive Parabolic Interpolation}
+%
+%\begin{itemize}
+%\item Like in secant methods, we can use previous points, rather than derivatives of $f$ to define quadratic approximation to $f$:
+%
+%\lgcond{
+%Given three points, there is a unique quadratic function interpolating them.
+%}
+%
+%\item The convergence rate of the resulting method is roughly $1.324$
+%
+%\lgcond{
+%By comparison, the convergence of bisection is linear with a constant of $0.618$, while Newton's method converges quadratically.
+%}
+%
+%\end{itemize}
+%
+%\end{frame}
+%\end{document}
+
+
+\begin{frame}{Successive Parabolic Interpolation}
+
+\begin{itemize}
+\item Interpolate $f$ with a quadratic function at each step and find its minima:
+
+\lgcond{
+Given three points, there is a unique quadratic function interpolating them.
+}
+
+\item The convergence rate of the resulting method is roughly $1.324$
+
+\lgcond{
+By comparison, the convergence of golden section search is linear with a constant of $0.618$, while Newton's method converges quadratically.
+}
+
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}{Newton's Method for Optimization}
+%
+%\begin{itemize}
+%\item Instead of interpolating points, match derivatives at current approximate point:
+%
+%\lgcond{
+%Pick quadratic function $\hat{f}$ as first three terms of Taylor expansion of $f$ about $x_k$, matching value and first two derivatives of $f$ at $x_k$.
+%}
+%
+%\item The new approximate guess will be given by $x_{k+1}-x_k = -f'(x_k)/f''(x_k)$:
+%
+%\lgcond{
+%\[f(x_{k+1}-x_k) \approx \hat{f}(x_{k+1}-x_k) = f(x_k)+f'(x_k)(x_{k+1}-x_k) + \frac{1}{2}f''(x_k)(x_{k+1}-x_k)^2\]
+%since the function is quadratic, we can find its unique critical point to find its minima,
+%\[\hat{f}'(x_{k+1}-x_k) = f'(x_k) + f''(x_k)(x_{k+1}-x_k) = 0.\]
+%}
+%
+%\end{itemize}
+%
+%\end{frame}
+
+
+
+\begin{frame}{Safeguarded 1D Optimization}
+
+\begin{itemize}
+\item Safeguarding can be done by bracketing via golden section search:
+
+\lgcond{
+Combination of Newton and golden section search 
+\begin{itemize}
+\sitem achieves quadratic convergence locally,
+\sitem is guaranteed convergence provided unimodality of function.
+\end{itemize}
+}
+
+\item Backtracking and step-size control:
+
+\lgcond{
+\begin{itemize}
+\sitem Can take smaller step $x_{k+1} = x_k - \alpha_k f'(x_k)/f''(x_k)$ for some $\alpha_k<1$.
+\sitem Can backtrack and choose smaller $\alpha_k$ if $f(x_{k+1})>f(x_k)$.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\section{Multidimensional Quadratic Optimization}
+
+\subsection{Steepest Descent}
+
+\begin{frame}{General Multidimensional Optimization}
+
+\urcornerlinkdemo{06-optimization}{Nelder-Mead Method}
+
+\begin{itemize}
+\item Direct search methods by simplex (\coloremph{Nelder-Mead}):
+
+\lgcond{
+Form a $n$-point polytope in $n$-dimensional space and adjust worst point (highest function value) by moving it along a line passing through the centroid of the remaining points.
+}
+
+\item Steepest descent: find the minimizer in the direction of the negative gradient:
+
+\lgcond{
+\[\B{x}_{k+1} = \B{x}_k - \alpha_k \nabla f(\B x_k)\]
+such that $f(\B{x}_{k+1})=\min_{\alpha_k} f(\B{x}_k - \alpha_k \nabla f(\B x_k))$, i.e. perform a line search (solve 1D optimization problem) in the direction of the negative gradient.
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Convergence of Steepest Descent}
+
+\urcornerlinkdemo{06-optimization}{Steepest Descent}
+
+\begin{itemize}
+\item Steepest descent converges linearly with a constant that can be arbitrarily close to $1$:
+
+\lgcond{
+%See Michael Heath's notes chapter 6 slide 35 for an example.
+\begin{itemize}
+\sitem Convergence is slow locally, in the worst case, and generally depends on the Hessian near the minima.
+\sitem If the gradient is changing quickly, it serves as good approximation only within a small local neighborhood, so the line search may result in arbitrarily small steps.
+\end{itemize}
+}
+\item Given quadratic optimization problem $f(\B x)= \frac{1}{2}\B x^T\B A \B x + \B c^T \B x$ where $\B A$ is symmetric positive definite, the error $\B e_k = \B x_k - \B x^{*}$ satisfies
+\lgcond{
+\[||\B e_{k+1}||_{\B A} = \B e_{k+1}^T \B A \B e_{k+1} = \frac{\sigma_\text{max}(\B A) -\sigma_\text{min}(\B A)}{\sigma_\text{max}(\B A) +\sigma_\text{min}(\B A)}||\B e_k||_{\B A}\]
+
+\begin{itemize}
+\item When sufficiently close to a local minima, general nonlinear optimization problems are described by such an SPD quadratic problem.
+\sitem Convergence rate depends on the conditioning of $\B A$, since 
+\[\frac{\sigma_\text{max}(\B A) -\sigma_\text{min}(\B A)}{\sigma_\text{max}(\B A) +\sigma_\text{min}(\B A)}=\frac{\kappa(\B A)-1}{\kappa(\B A)+1}.\]
+\end{itemize}
+}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Gradient Methods with Extrapolation}
+
+\begin{itemize}
+\item We can improve the constant in the linear rate of convergence of steepest descent by leveraging \coloremph{extrapolation methods}, which consider two previous iterates (maintain \coloremph{momentum} in the direction $\B x_k -\B x_{k-1}$):
+\lgcond{
+\[\B x_{k+1} = \B x_k - \alpha_k \nabla f(\B x_k) + \beta_k(\B x_k - \B x_{k-1})\]
+
+
+}
+
+\item The \coloremph{heavy ball method}, which uses constant $\alpha_k=\alpha $ and $\beta_k=\beta$, achieves better convergence than steepest descent:
+
+\lgcond{
+\[||\B e_{k+1}||_{\B A} = \frac{\sqrt{\kappa(\B A)} -1}{\sqrt{\kappa(\B A) }+1}||\B e_k||_{\B A}\]
+Nesterov's gradient optimization method is another instance of an extrapolation method that provides further improved optimality guarantees.
+
+}
+
+\end{itemize}
+
+\end{frame}
+
+\subsection{Conjugate Gradient}
+
+\urcornerlinkdemo{06-optimization}{Conjugate Gradient Method}
+
+\begin{frame}{Conjugate Gradient Method}
+
+\begin{itemize}
+\item The \coloremph{conjugate gradient method} is capable of making the optimal choice of $\alpha_k$ and $\beta_k$ at each iteration of an extrapolation method:
+
+\lgcond{
+\[(\alpha_k,\beta_k)=\argmin_{\alpha_k,\beta_k}\bigg[f\Big(\B x_k - \alpha_k \nabla f(\B x_k) + \beta_k(\B x_k - \B x_{k-1})\Big)\bigg]\]
+\begin{itemize}
+\item For SPD quadratic programming problems, conjugate gradient is an optimal 1st order method, converging in $n$ iterations.
+\sitem It implicitly computes Lanczos iteration, searching along $\B A$-orthogonal directions at each step.
+\end{itemize}
+}
+
+\item \coloremph{Parallel tangents} implementation of the method proceeds as follows
+
+\lgcond{
+\begin{enumerate}
+\sitem Perform a step of steepest descent to generate $\B{\hat{x}}_{k}$ from $\B x_k$.
+\sitem Generate $\B x_{k+1}$ by minimizing over the line passing through $\B x_{k-1}$ and $\B{\hat{x}}_{k}$.
+\end{enumerate}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Krylov Optimization}
+
+\urcornerlinkdemo{06-optimization}{Conjugate Gradient Parallel Tangents as Krylov Subspace Method}
+
+\begin{itemize}
+\item Conjugate Gradient finds the minimizer of $f(\B x) = \frac{1}{2} \B x^T \B A \B x + \B c^T \B x $ within the Krylov subspace of $\B A$:
+%Generally, Krylov subspaces describe the information available from $k$ matrix-vector products, and can be used to find an approximation $\B x_k$ to the minima of $\B c^T \B x - \B x^T \B A \B x $:
+
+\lgcond{
+\begin{itemize}
+\sitem It constructs Krylov subspace $\mathcal{K}_k(\B A, \B c) = \text{span}(\B c,\B A\B c, \ldots, \B A^{r-1}\B c)$.
+\sitem At the $k$th step conjugate gradient yields iterate
+\[\B x_k = -||\B c||_2\B Q_k \B T_k^{-1} \B e_1 ,\]
+where $\B Q_k$ are the Lanczos vectors associated with $\mathcal{K}_k(\B A, \B c)$ and $\B T_k =\B Q_k^T \B A \B Q_k$.
+\sitem This choice of $\B x_k$ minimizes $f(\B x)$ since
+\begin{align*}
+\min_{\B x \in \mathcal{K}_k(\B A, \B c)} f(\B x) &= \min_{\B y \in \mathbb{R}^k} f(\B Q_k \B y)  \\
+&=\min_{\B y \in \mathbb{R}^k} \B y^T \B Q_k^T \B A \B Q_k \B y + \B c^T \B Q_k \B y \\
+&= \min_{\B y \in \mathbb{R}^k} \B y^T \B T_k \B y + ||\B c||_2\B e_1^T \B y
+\end{align*}
+is minimized by $\B y = -||\B c||_2\B T_k^{-1} \B e_1 $.
+%\sitem MINRES/GMRES (usually used to solve least squares problems) minimize residual of optimality equation: $||\B A \B x + \B c||_2^2$.
+%\sitem Our goal is to obtain $\B x_r = \argmin_{\B x \in \mathcal{K}_r}f(\B x)$:
+%\sitem The $r$th iteration conjugate gradient gives 
+%\item there is insufficient information to minimize $||\B x_k - \B x^*||_2^2$
+%\sitem The $r$th iterate of conjugate gradient minimizes this residual in $\B A^{-1}$ norm:
+%\[\B x_r = \argmin_{\B x \in \mathcal{K}_r(\B A, \B c)}||\B A \B x + \B c||_{\B A^{-1}}^2=\argmin_{\B x \in \mathcal{K}_r(\B A, \B c)} \B x^T \B A \B x + 2 \B c^T\B x = \argmin_{\B x \in \mathcal{K}_r(\B A, \B c)} f(\B x).\]
+%\[ = (\B c^T - \B A \B x_k)^T\B{A}^{-1}(\B c^T - \B A \B x_k)\]
+\end{itemize}
+}
+\lgcond{}
+\end{itemize}
+%\item Conjugate gradient can be derived from vectors (columns of $\B Q_r$) generated by the Lanczos algorithm, in particular if $\B T_r = \B Q_r^T \B A \B Q_r$,
+%\[\B x_r = -\B Q_r \B T_r^{-1} \B e_1 ||\B c||_2.\] 
+%
+%\lgcond{
+%This iterate minimizes the projection of the residual onto $\B Q_r=\begin{bmatrix} \frac{\B c}{||\B c||_2} & \cdots \end{bmatrix}$,
+%\begin{align*}
+%\B 0 = 
+%\B Q^T_r (\B c + \B A \B x_r) & = \B e_1 ||\B c||_2  + \underbrace{\B Q_r^T \B A\B Q_r}_{\B T_r} \B T_r^{-1} \B e_1||\B c ||_2
+%\end{align*}
+%}
+\end{frame}
+
+
+\section{General Nonlinear Optimization Methods}
+
+\subsection{Newton's Method}
+
+\begin{frame}{Newton's Method}
+
+\urcornerlinkdemo{06-optimization}{Newton's Method in n dimensions}
+
+\begin{itemize}
+\item Newton's method in $n$ dimensions is given by finding minima of $n$-dimensional quadratic approximation:
+\lgcond{
+\[f(\B x_k+\B s)\approx \hat{f}(\B s) = f(\B x_k) + \B s^T \nabla f(\B x_k) + \frac{1}{2}\B s^T \B H_{f}(\B x_k)\B s.\]
+
+The minima of this function can be determined by identifying critical points
+\[\B 0=\nabla \hat{f}(\B s) = \nabla f(\B x_k) + \B H_{f}(\B x_k)\B s,\]
+thus to determine $\B s$ we solve the linear system,
+\[\B H_{f}(\B x_k)\B s =- \nabla f(\B x_k).\]
+Assuming invertibility of the Hessian, we can write the Newton's method iteration as
+\[\B x_{k+1} = \B x_k - \underbrace{\B H_{f}(\B x_k)^{-1}\nabla f(\B x_k)}_{\B s}.\]
+Quadratic convergence follows by equivalence to Newton's method for solving nonlinear system of optimality equations \(\nabla f(\B x) = \B 0.\)
+}
+\lgcond{
+}
+
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}{Convergence of Newton's Method}
+%
+%\begin{itemize}
+%\item Newton's method is quadratically convergent in $n$-dimensions as well:
+%
+%\lgcond{
+%%Let $\B g(\B x)$ be the fixed-point iteration corresponding to Newton's method, using a Taylor expansion at the minima, which is valid in the limit of increasing $k$, we obtain
+%\begin{align*}
+%\B e_{k+1} &= \B x_{k+1} - \B x^* \\
+%           &= \B x_k - \B x^* - \B H_{f}(\B x_k)^{-1}\nabla f(\B x_k) \\
+%           &= -\B H_{f}(\B x_k)^{-1}(\B H_{f}(\B x_k)(\B x_k -\B x^*)- \nabla f(\B x_k)) \\
+%           &= -\B H_{f}(\B x_k)^{-1}(\B H_{f}(\B x_k)(\B x_k -\B x^*)- (\nabla f(\B x_k) - \nabla f(\B x^*))), \\
+%|| \B e_{k+1}|| &\leq ||\B H_{f}(\B x_k)^{-1}|| \underbrace{|| \B H_{f}(\B x_k)(\B x_k -\B x^*)- (\nabla f(\B x_k) - \nabla f(\B x^*) ||}_{O(||\B x_k - \B x^*||^2)} \\
+%           &= C ||\B e_{k}||^2
+%\end{align*}
+%}
+%\lgcond{}
+%
+%
+%\end{itemize}
+%
+%\end{frame}
+
+\subsection{Quasi-Newton Method}
+
+\begin{frame}{Quasi-Newton Methods}
+
+\begin{itemize}
+\item \coloremph{Quasi-Newton} methods compute approximations to the Hessian at each step:
+
+\lgcond{
+\[\B x_{k+1}  = \B{x}_k -\alpha_k\B{B}_k^{-1}\nabla f(\B x_k)\]
+where $\alpha_k$ is a line search parameter.
+Quasi-Newton methods can be more robust than Newton's method, as the Newton's method step can lead to a direction in which the objective function is strictly increasing.
+%Let $\B g(\B x)$ be the fixed-point iteration corresponding to Newton's method, using a Taylor expansion at the minima, which is valid in the limit of increasing $k$, we obtain
+}
+
+\item   The \coloremph{BFGS} method is a secant update method, similar to Broyden's method:
+
+\lgcond{
+\begin{itemize}
+\sitem At each iteration, perform a rank-2 update to $\B B_{k}$ using $\B{s}_k = \B{x}_{k+1}-\B{x}_k$ and $\B{y_k} =\nabla f(\B{x}_{k+1})-\nabla f(\B{x}_{k})$:
+\[\B{B}_{k+1} = \B{B}_k + \frac{\B{y}_k\B{y}_k^T}{\B{y}_k^T\B{s}_k} - \frac{\B{B}_k\B{s}_k \B{s}_k^T\B{B}_k}{\B{s}_k^T\B{B}_k \B{s}_k}\]
+\sitem Can update inverse with $O(n^2)$ work, but its more stable and efficient to update a symmetric indefinite factorization.
+\sitem The BFGS method also preserves symmetry of the Hessian approximation.
+\end{itemize}
+}
+
+
+\end{itemize}
+
+\end{frame}
+
+\section{Nonlinear Least Squares}
+
+\begin{frame}{Nonlinear Least Squares}
+
+\begin{itemize}
+\item An important special case of multidimensional optimization is \coloremph{nonlinear least squares}, the problem of fitting a nonlinear function $f_{\B x}(t)$ so that $f_{\B x}(t_i)\approx y_i$:
+
+\mdcond{
+For example, consider fitting $f_{[x_1,x_2]}(t) = x_1 \sin(x_2t)$ so that 
+\[\begin{bmatrix} f_{[x_1,x_2]}(1.5) \\f_{[x_1,x_2]}(1.9)\\f_{[x_1,x_2]}(3.2) \end{bmatrix} \approx \begin{bmatrix} -1.2 \\ 4.5 \\ 7.3 \end{bmatrix}.\]
+}
+\item We can cast nonlinear least squares as an optimization problem and solve it by Newton's method:
+
+\lgcond{
+Define residual vector function $\B r(\B x)$ so that $r_i(\B x)= y_i-f_{\B x}(t_i)$ and minimize 
+\[\phi(\B x)=\frac{1}{2}||\B r(\B x)||_2^2=\frac{1}{2}\B r(\B x)^T\B r(\B x).\]
+Now the gradient is $\nabla \phi(\B x) = \B J_{\B r}^T(\B x)\B r(\B x)$ and the Hessian is 
+\[\B{H}_{\phi}(\B x) = \B{J}^T_{\B r}(\B x)\B{J}_{\B r}(\B x) + \sum_{i=1}^m r_i(\B x)\B{H}_{r_i}(\B x).\]
+}
+\mdcond{}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Gauss-Newton Method}
+
+\begin{itemize}
+\item The Hessian for nonlinear least squares problems has the form:
+
+\lgcond{
+%Note that the Hessian used in Newton's method is given by
+\[\B{H}_{\phi}(\B x) = \B{J}^T_{\B r}(\B x)\B{J}_{\B r}(\B x) + \sum_{i=1}^m r_i(\B x)\B{H}_{r_i}(\B x).\]
+The second term is small when the residual function $\B r(\B x)$ is small, so approximate
+\[\B H_{\phi}(\B x) \approx \B{\hat{H}}_{\phi}(\B x) = \B J_{\B r}^T(\B x)\B J_{\B r}(\B x).\]
+%and we can observe that the error is small if $||\B r(\B x)||_2$ is small,
+%\[||\B H_{\phi}(\B x) - \B{\hat{H}}_{\phi}(\B x)||_F = ||\B r(\B x)||_2 \sum_{i=1}^m ||\B H_{r_i}(\B x)||_F\]
+}
+\item The \coloremph{Gauss-Newton} method is Newton iteration with an approximate Hessian:
+\lgcond{
+  \begin{align*}
+  \B x_{k+1} &= \B x_{k} - \B{\hat{H}}_{\phi}(\B x_k)^{-1} \nabla f(\B x_k) 
+             = \B x_{k} - (\B J_{\B r}^T(\B x_k)\B J_{\B r}(\B x_k))^{-1} \B J_{\B r}^T(\B x_k)\B r(\B x_k).
+  \end{align*}
+Recognizing the normal equations, we interpret the Gauss-Newton method as solving  linear least squares problems $\B J_{\B r}(\B x_k)\B s_k  \cong \B r(\B x_k), \B x_{k+1}= \B x_k + \B s_k$.
+}
+\item The Levenberg-Marquardt method incorporates Tykhonov regularization into the linear least squares problems within the Gauss-Newton method.
+\end{itemize}
+
+\end{frame}
+%\begin{frame}{Levenberg-Marquardt Method}
+%
+%\begin{itemize}
+%\item The \coloremph{Levenberg-Marquardt} method modifies the Gauss-Newton method to use Tykhonov regularization:
+%
+%\lgcond{
+%  \begin{align*}
+%  \B x_{k+1} &= \B x_{k} - (\B J_{\B r}^T(\B x_k)\B J_{\B r}(\B x_k) - \mu \B I)^{-1} \B J_{\B r}(\B x_k)\B r(\B x_k).
+%  \end{align*}
+%}
+%
+%\item The scalar $\mu$ controls the step size through the least squares problem:
+%
+%
+%\lgcond{
+%  \[\begin{bmatrix} \B J_{\B r}(\B x_k) \\ \sqrt{\mu} \B I \end{bmatrix} \B s_k \cong \begin{bmatrix} \B r(\B x_k) \\ \B 0 \end{bmatrix}\]
+%By increasing $\mu$ we force the step $\B s$ to be smaller.
+%}
+%\end{itemize}
+%
+%\end{frame}
+
+
+
+
+\section{Constrained Optimization Methods}
+
+\subsection{Overview of Approaches}
+
+%\end{document}
+
+
+\begin{frame}{Constrained Optimization Problems}
+
+\begin{itemize}
+\item We now return to the general case of \coloremph{constrained} optimization problems:
+\lgcond{
+\[\min_{\B x} f(\B x)\quad \text{subject to} \quad \B g(\B x) = \B 0 \quad \text{and} \quad \B{h}(\B x) \leq \B 0\]
+
+When $f$ is quadratic, while $h$, $g$ is linear, this is a \coloremph{quadratic optimization} problem.
+}
+
+\item Generally, we will seek to reduce constrained optimization problems to a series of unconstrained optimization problems:
+
+%\lgcond{
+\begin{itemize}
+\mitem \coloremph{sequential quadratic programming}: \filufil{solve an unconstrained quadratic optimization problem at each iteration,}{\medskip}
+\mitem \coloremph{penalty-based methods}: \filufil{solve a series of more complicated (more ill-conditioned) unconstrained optimization problems,}{\medskip}
+\mitem \coloremph{active set methods}: \filufil{define sequence of optimization problems with inequality constrains ignored or treated as equality constraints.}{\medskip}
+\end{itemize}
+%}
+\end{itemize}
+
+\end{frame}
+
+
+%\begin{frame}{Constrained Optimality}
+%
+%\begin{itemize}
+%\item In equality-constrained optimization $\B g(\B x)=\B 0$, minimizers $\B x^*$ are on the border of the feasible region (set of points satisfying constraints),
+%      in which case we must ensure any direction of decrease of $f$ from $\B x^*$ leads to an infeasible point, which gives us the condition:
+%
+%\[\exists \B \lambda\in\mathbb{R}^n, \quad -\nabla f(\B x^*) = \B J^T_{\B g}(\B x^*) \B \lambda\]
+%
+%\mdcond{
+%$\B \lambda$ are referred to as the Lagrange multipliers.
+%}
+%
+%\item Seek critical points in the Lagrangian function $\mathcal{L}(\B x, \B \lambda) = f(\B x) + \B \lambda^T\B g(\B x)$, described by the nonlinear equation,
+%
+%\[\nabla \mathcal{L}(\B x, \B \lambda) = \begin{bmatrix} \nabla f(\B x) + \B J_{\B g}^T(\B x) \B \lambda \\ \B g(\B x)\end{bmatrix} = \B 0\]
+%
+%\lgcond{
+%Seeking $\B \lambda$ that maximizes the global minimum of $\mathcal{L}(\B x, \B \lambda)$ defines the \coloremph{dual optimization problem}.
+%}
+%\mdcond{}
+%
+%
+%\end{itemize}
+%
+%
+%\end{frame}
+
+\subsection{Optimization with Equality Constraints}
+
+%\begin{frame}{Sequential Quadratic Programming}
+%
+%\begin{itemize}
+%\item \coloremph{Sequential quadratic programming (SQP)} reduces a nonlinear equality constrained problem to a sequence of constrained quadratic programs
+%via a Taylor expansion of the Lagrangian function $\mathcal{L}_f(\B x, \B \lambda)=f(\B x)+\B \lambda ^T\B g(\B x)$:
+%\lgcond{
+%\begin{align*} 
+%q(\B x_k+ \B s,\B \lambda_k + \B \delta ) =& \mathcal{L}_f(\B x_k, \B \lambda_k) + \B s^T (\nabla f(\B x_k) + \B J_{\B g}^T(\B x_k)\B \lambda_k) + \frac{1}{2}\B s^T \B B(\B x_k, \B \lambda_k)\B s \\
+%&+\B \delta^T (\B J_{\B g}(\B x_k) \B s + \B g(\B x_k))
+%\end{align*}
+%where $\B B(\B x, \B \lambda) = \B H_{f}(\B x) + \sum_{i=1}^m \lambda_i \B H_{g_i}(\B x)$
+%}
+%\item SQP ignores the constant term $\mathcal{L}_f(\B x_k, \B \lambda_k)$ and minimizes $\B s$ while treating $\B \delta$ as a Lagrange multiplier:
+%
+%\lgcond{
+%The above unconstrained quadratic program corresponds to the Lagrangian form of the constrained quadratic program
+%\begin{align*} 
+%\max_{\B s} \B s^T (\nabla f(\B x_k) + \B J_{\B g}^T(\B x_k)\B \lambda_k) + \frac{1}{2}\B s^T \B B(\B x_k, \B \lambda_k)\B s
+%\end{align*}
+%with constraint $\B J_{\B g}(\B x_k) \B s = -\B g(\B x_k)$.
+%
+%%and use a linear approximation of the constraint $\B g(\B x_k + \B s)=\B 0$, 
+%%subject to the linear constraint approximation $\B J_{\B g}(\B x_k) \B s = -\B g(\B x_k)$.
+%}
+%
+%%\item We can reduce a constrained quadratic program to an unconstrained one, using the Lagrangian function of $q$:
+%%\lgcond{
+%%\[\mathcal{L}_q(\B x_k+ \B s,\B \lambda + \B \delta, \B \mu ) = f(\B x_k) + \B s^T (\nabla f(\B x_k) + \B J_g^T(\B x_k)\B \lambda_k) + \frac{1}{2}\B s^T \B B(\B x_k)\B s + \mu(\B J_{\B g}(\B x_k) \B s +\B g(\B x_k))\]
+%%which we can solve directly as a linear system.
+%%%\[\mathcal{L}_{\hat{f}}(\B x_k+ \B s,\B \lambda) = f(\B x_k) + \B s^T \nabla f(\B x_k) + \frac{1}{2}\B s^T \B H_{f}(\B x_k)\B s + \B \lambda^T(\B J_{\B g}(\B x_k) \B s + \B g(\B x_k)) \]
+%%The minima of $q$ will correspond to a critical point of $\mathcal{L}_{\hat{f}}$, which may or may not be the true minima.
+%%}
+%%
+%\end{itemize}
+%
+%
+%\end{frame}
+
+
+\begin{frame}{Sequential Quadratic Programming}
+
+\urcornerlinkdemo{06-optimization}{Sequential Quadratic Programming}
+
+\begin{itemize}
+\item \coloremph{Sequential quadratic programming} (SQP) corresponds to using Newton's method to solve the equality constrained optimality conditions, by finding critical points of the Lagrangian function $\mathcal{L}(\B x, \B \lambda) = f(\B x) + \B \lambda^T\B g(\B x)$,
+\mdcond{
+\[\nabla \mathcal{L}(\B x, \B \lambda) = \begin{bmatrix} \nabla f(\B x) + \B J_{\B g}^T(\B x) \B \lambda \\ \B g(\B x)\end{bmatrix} = \B 0\]
+}
+
+\item At each iteration, SQP computes $\begin{bmatrix} \B x_{k+1} \\ \B \lambda_{k+1}\end{bmatrix} = \begin{bmatrix} \B x_{k}\\ \B \lambda_{k}\end{bmatrix} + \begin{bmatrix} \B s_k \\ \B\delta_k \end{bmatrix}$ by solving
+\lgcond{
+\[\B H_{\mathcal{L}}(\B x_k, \B \lambda_k)\begin{bmatrix} \B s_k \\ \B\delta_k \end{bmatrix} =  -\nabla \mathcal{L}(\B x_k, \B \lambda_k)\]
+% = -\begin{bmatrix} \nabla f(\B x_k) + \B J_{\B g}^T(\B x_k) \B \lambda_k \\ \B g(\B x_k)\end{bmatrix}
+where 
+\[\B H_{\mathcal{L}}(\B x_k, \B \lambda_k) = \begin{bmatrix} \B B(\B x_k, \B\lambda_k) & \B J^T_{\B g}(\B x_k) \\ \B J_{\B g}(\B x_k) & \B 0\end{bmatrix} \quad \text{with} \quad \B B(\B x, \B \lambda) = \B H_{f}(\B x) + \sum_{i=1}^m \lambda_i \B H_{g_i}(\B x)\]
+}
+
+\end{itemize}
+
+
+\end{frame}
+
+%\begin{frame}{Quadratic Programming Problems}
+%
+%\begin{itemize}
+%\item An equality-constrained quadratic programming problem has the form
+%\[\min_{\B x} f(\B x), \quad f(\B x)=\frac{1}{2} \B x^T \B Q \B x + \B c^T \B x \quad \text{subject to} \quad \B A \B x = \B b\]
+%where $\B Q$ is symmetric.
+%
+%\lgcond{
+%Its first-order optimality condition in the unconstrained case is
+%\[\B 0 = \nabla f(\B x)  = \B Q \B x + \B c \quad \Rightarrow \quad \B Q \B x =-\B c\]
+%and in the constrained case, becomes 
+%\[ \begin{bmatrix} \B Q & \B A^T \\ \B A & \B 0 \end{bmatrix} \begin{bmatrix} \B x \\ \B \lambda \end{bmatrix} = - \begin{bmatrix} \B c \\ \B b \end{bmatrix} \]
+%This allows us to observe, that at the $k$th iteration SQP solves a QP with $\B Q =\B B(\B x_k, \B\lambda_k)$, $\B A =\B J_g(\B x_k)$, $\B c =\nabla f(\B x_k) + \B J_{\B g}^T(\B x_k)$, and $\B b = \B g(\B x_k)$.
+%}
+%\end{itemize}
+%
+%
+%\end{frame}
+%
+%\begin{frame}{Steepest Descent for Quadratic Programming}
+%
+%\begin{itemize}
+%\item Near the minima, all smooth nonlinear programming problems look like quadratic programming problems, where $\B Q$ converges to the Hessian at the minima, $\B H_f(\B x^*)$.
+%
+%\lgcond{}
+%
+%\item Consequently, we can analyze local convergence of methods by considering their convergence for a QP, e.g. for steepest descent:
+%
+%\lgcond{
+%Assume $\B b =\B 0$ and $\B c =\B 0$, then we have $\nabla f(\B x) = \B Q \B x$.
+%Consequently, steepest descent will seek a step-size $\alpha_k$ to perform the step
+%\[\B x_{k+1} = \B x_{k} -\alpha_k \B Q \B x_k = (\B I - \alpha_k \B Q) \B x_k\]
+%for this fixed-point iteration to converge, it suffices that $\alpha_k<2/\lambda_{\text{max}}(\B Q)$.
+%The optimal value can be shown to be $\alpha^*=2/(\lambda_{\text{max}}(\B Q) + \lambda_{\text{min}}(\B Q))$, leading to convergence rate
+%\[||\B e_{k+1}|| = \frac{\kappa(\B Q) -1}{\kappa(\B Q) +1}||\B e_k||\]
+%}
+%
+%\end{itemize}
+%
+%\end{frame}
+
+\subsection{Optimization with Inequality Constraints}
+
+\begin{frame}{Inequality Constrained Optimality Conditions}
+
+\begin{itemize}
+
+
+\item The \coloremph{Karush-Kuhn-Tucker (KKT)} conditions hold for local minima of a problem with equality and inequality constraints, the key conditions are
+
+\lgcond{
+\begin{itemize}
+\sitem First, any minima $\B x^*$ must be a feasible point, so $\B g(\B x^*) =\B 0$ and $\B h(\B x^*) \leq \B 0$.
+\sitem We say the $i$th inequality constraint is \coloremph{active} at a minima $\B x^*$ if $h_i(\B x^*) = 0$.
+\sitem The collection of equality constraints and active inequality constraints $\B q^*$, satisfies $\B q^*(\B x^*) = \B 0$.
+\sitem The negative gradient of the objective function at the minima must be in the row span of the Jacobian of this collection of constraints:
+\[-\nabla f(\B x^*)= \B J_{\B q^*}^T(\B x^*)\B \lambda^* \quad \text{where $\B \lambda^*$ are Lagrange multiplers of constraints in $\B q^*$} .\]
+\end{itemize}
+}
+%for the general Lagrangian function $\mathcal{L}(\B x, \B \mu, \B \nu) = f(\B x)+\B \mu^T \B g(\B x) + \B \nu^T \B h(\B x)$ are 
+%%\lgcond{
+%\begin{align*}
+%\nabla_{\B x}\mathcal{L} (\B x, \B \lambda) & = \B 0\\
+%\B g(\B x) &= \B 0\\
+%\B h(\B x) &\leq \B 0\\
+%\B \nu &\geq \B 0\\
+%\B \nu^T \B h (\B x)  &= \B 0
+%\end{align*}
+%\smcond{
+%At an optimal point, we must have that for either the $i$th inequality constraint is \coloremph{active}, so $h_i(\B x)=\B 0$ or it is inactive, but its Lagrange multiplier $\nu_i=0$.
+%}
+\item %SQP can handle only equality constraints, 
+To use SQP for an inequality constrained optimization problem, consider at each iteration an \coloremph{active set} of constraints:
+
+\lgcond{
+\begin{itemize}
+\sitem Active set $\B q_k$ contains all equality constraints and all inequality constraints that are exactly satisfied or violated at $\B x_k$.
+\sitem Perform one step of Newton's method to minimize $\mathcal{L}_k(\B x, \B \lambda) = f(\B x) + \B \lambda^T \B q_k(\B x)$ with respect to $\B x$ and $\B \lambda$, then update active set.
+%\sitem A minima $\B x^*$ will be a feasible point and if the constraints in the active set at $x^*$ are $\B q(\B x)$ with Lagrange multipliers $\B \lambda$, then 
+\end{itemize}
+%A constraint is active if the current iterate is at a boundary satisfies the inequality constraint as an equality (i.e. $i$th constraint is active if $i$th component of $\B h(\B x_k)$ is zero).
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+%\begin{frame}{Optimality Conditions for Inequality Constraints}
+%
+%\begin{itemize}
+%\item The Lagrangian function with constraints $\B g(\B x) = \B 0$ and $\B{h}(\B x) \leq \B 0$ is
+%\lgcond{
+%\[\mathcal{L}(\B x, \B \lambda) = f(\B x) + \B \lambda^T \begin{bmatrix} \B h(\B x) \\ \B g(\B x)\end{bmatrix}\]
+%
+%%\[\mathcal{L}(\B x, \B \lambda) = f(\B x) +  \B \lambda_1^T \B h(\B x)  + \B \lambda_2^T \B g(\B x)\]
+%}
+%
+%\item The Lagrangian dual problem is an unconstrained optimization problem:
+%\[\max_{\B \lambda} q(\B \lambda), \quad q(\B \lambda) =   \begin{cases}  \min_{\B x} \mathcal{L}(\B x, \B \lambda) & \text{if } \B \lambda \geq \B 0 \\   -\infty & \text{otherwise}\end{cases}\]
+%The unconstrained optimality condition $\nabla q(\B \lambda^*) = \B 0$, implies 
+%\lgcond{
+%\[\max\left(\B \lambda^*,\begin{bmatrix} \B h(\B x) \\ \B g(\B x)\end{bmatrix}\right) = \B 0\]
+%when $\lambda_i^*= 0$, we say the $i$th constraint is inactive at the minimum point.
+%Equality constraints are active at any feasible point.
+%}
+%
+%
+%\end{itemize}
+%
+%
+%\end{frame}
+
+
+%\begin{frame}{Merit Functions}
+%
+%\begin{itemize}
+%\item We can reduce constrained optimization problems to unconstrained ones by modifying the objective function. \coloremph{Penalty} methods are effective for equality constraints $\B g(\B x)=0$:
+%
+%\lgcond{
+%A simple penalty function parameterized by $\rho >0$ is
+%\[\phi_\rho(\B x) = f(\B x) + \frac{1}{2} \rho \B g(\B x)^T \B g(\B x)\]
+%a more robust variant is the augmented Lagrangian function
+%\[\mathcal{L}_\rho(\B x,\B \lambda) = f(\B x) + \B \lambda^T \B g(\B x)+\frac{1}{2} \rho \B g(\B x)^T \B g(\B x)\]
+%by increasing $\rho$, in theory convergence to an optimal solution can be expected, however, we must insure the Hessian of $\phi$ is not too ill-conditioned.
+%
+%}
+%
+%\item Barrier functions provide an effective way (\coloremph{interior point methods}) of working with inequality constraints $\B h(\B x)\leq \B 0$:
+%
+%\lgcond{
+%To enforce inequality constraints via the objective function, we can introduce barriers, like
+%\[\phi_\mu(\B x) = f(\B x) - \mu \sum_{i=1}^p\frac{1}{h_i(\B x)}\]
+%which is called the inverse barrier function, or the logarithmic barrier function
+%\[\phi_\mu(\B x) = f(\B x) - \mu \sum_{i=1}^p\log(-h_i(\B x))\]
+%hoping to obtain convergence by decreasing $\mu$ and ensuring the step size is sufficiently small.
+%
+%}
+%
+%
+%
+%\end{itemize}
+%
+%\end{frame}
+
+
+
+\begin{frame}{Penalty Functions}
+
+\begin{itemize}
+\item Alternatively, we can reduce constrained optimization problems to unconstrained ones by modifying the objective function. \coloremph{Penalty} functions are effective for equality constraints $\B g(\B x)=0$:
+
+\lgcond{
+\[\phi_\rho(\B x) = f(\B x) + \frac{1}{2} \rho \B g(\B x)^T \B g(\B x)\]
+is a simple merit function, and its solutions $\B x^*_\rho$ satisfy $\lim_{\rho \to \infty} \B x_\rho^* = \B x^*$.
+However, the Hessian of $\phi_\rho$ becomes increasingly ill-conditioned for large $\rho$, leading to slow convergence.
+}
+
+\item The augmented Lagrangian function provides a more numerically robust approach:
+\lgcond{
+\[\mathcal{L}_\rho(\B x, \B \lambda) = f(\B x) + \B \lambda^T\B g(\B x) + \frac{1}{2} \rho \B g(\B x)^T \B g(\B x)\]
+}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Barrier Functions}
+
+\begin{itemize}
+
+\item \coloremph{Barrier functions} (\coloremph{interior point methods}) provide an effective way of working with inequality constraints $\B h(\B x)\leq \B 0$:
+
+\lgcond{
+\begin{itemize}
+\item Provided we start at a feasible point, modify objective function so it diverges to $\infty$ when approaching border of feasible region.
+\mitem Inverse barrier function: \[\phi_\mu(\B x) = f(\B x) - \mu\sum_{i=1}^m\frac{1}{h_i(\B x)}.\]
+\mitem Logarithmic barrier function: \[\phi_\mu(\B x) = f(\B x) - \mu\sum_{i=1}^m\log(-h_i(\B x)).\]
+%The minimum $\phi_\mu$ is guaranteed to be in the feasible domain and 
+\mitem When using sufficiently small steps, we have $\B x^*_\mu\to \B x^*$ as $\mu \to 0$.
+\end{itemize}
+}
+\lgcond{}
+
+
+
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}{Linear Programming}
+%
+%\begin{itemize}
+%
+%\item A linear program is a quadratic program with $\B Q = \B O$:
+%
+%\mdcond{}
+%
+%\item The simplex method is effective for linear programs, and operates by using the fact that the minimum over a convex polyhedron must occur at one of its vertices:
+%
+%\lgcond{}
+%
+%\item The sequential linear-quadratic programming algorithm provides an effective way of solving linear programs iwth inequality constraints:
+%
+%\mdcond{}
+%
+%\end{itemize}
+%
+%\end{frame}
+%\begin{frame}{Optimization with Data}
+%
+%\begin{itemize}
+%
+%\item Lets consider the matrix completion problem, which is a nonlinear optimization problem:
+%
+%\lgcond{
+%Given a subset of entries
+%\[\Omega\subseteq \{1,\ldots,n\}\times \{1,\ldots, n\}\]
+%of the entries of matrix $\Mat{A}\in \rmn nn$, seek rank-$k$ approximation
+%\[\argmin_{\Mat{W}\in \rmn mk, \Mat{H}\in \rmn nk} \sum_{(i,j)\in \Omega}\Big(\underbrace{a_{ij}-\sum_l w_{il}h_{jl}}_{(\Mat{A}-\Mat{W}\Mat{H}^T)_{ij}}\Big)^2 + \lambda(||\Mat{W}||_F + ||\Mat{H}||_F)\]
+%}
+%\lgcond{}
+%\end{itemize}
+%
+%\end{frame}
+%
+%
+%\begin{frame}{Alternating Least Squares}
+%
+%\begin{itemize}
+%\item Fix $\Mat{W}$ and solving for $\Mat{H}$ by quadratic optimization:
+%%\[\argmin_{\Mat{W}\in \rmn mk} \sum_{(i,j)\in \Omega} \Big(a_{ij}-\sum_l {w}_{il}{h}_{jl}\Big)^2 + \lambda||\Mat{W}||_F\]
+%%\lgcond{The optimization problem is independent for rows of $\Mat{W}$. Letting $\Vec{w}_i=w_{i\ALL}$, $\Vec{h}_i=h_{i\ALL}$, $\Omega_i =\{j : (i,j)\in\Omega\}$, seek
+%\[\argmin_{\Vec{w}_i\in \rn k}  \sum_{j\in \Omega_i} \Big(a_{ij}-\Vec{w}_i\Vec{h}_j^\T\Big)^2 + \lambda||\Vec{w}_i||_2\]
+%%}
+%%\item
+%\lgcond{
+%Seek minimizer $\Vec{w}_i$ for quadratic vector equation
+%\[f(\Vec{w}_i) = \sum_{j\in \Omega_i} \Big(a_{ij}-\Vec{w}_i\Vec{h}_j^\T\Big)^2 + \lambda||\Vec{w}_i||\]
+%
+%Differentiating with respect to $\Vec{w}_i$ gives
+%\[\frac{\partial f(\Vec{w}_i)}{\partial \Vec{w}_i} = 2\sum_{j\in \Omega_i}\Vec{h}_j^\T\Big( \Vec{w}_i\Vec{h}_j^\T-a_{ij}\Big) + 2\lambda \Vec{w}_i=0\]
+%Rotating $\Vec{w}_i\Vec{h}_j^\T=\Vec{h}_j\Vec{w}_i^\T$ and defining $\Mat{G}^{(i)}=\sum_{j\in\Omega_i}\Vec{h}_j^\T \Vec{h}_j$,
+%%$\in \rmn{|\Omega_i|}{k}$ 
+%%=[\Vec{h}_{j_1}; \Vec{h}_{j_2};...]$ $$
+%\[(\Mat{G}^{(i)}+\lambda \Mat{I})\Vec{w}_i^T = \sum_{j\in \Omega_i}\Vec{h}_j^\T a_{ij}\]
+%which is a $k\times k$ symmetric linear system of equations
+%}
+%\lgcond{}
+%\end{itemize}
+%
+%\end{frame}
+%
+%\begin{frame}{Gradient Descent for Matrix Completion}
+%
+%\begin{itemize}
+%\mitem Recall that we seek to minimize
+%\[f(\Vec{w}_i) = \sum_{j\in \Omega_i} \Big(a_{ij}-\Vec{w}_i\Vec{h}_j^\T\Big)^2 + \lambda||\Vec{w}_i||\]
+%ALS minimizes $\Vec{w}_i$, gradient descent methods only improve it using the partial derivative
+%\[\frac{\partial f(\Vec{w}_i)}{\partial \Vec{w}_i} = 2\sum_{j\in \Omega_i}\Vec{h}_j^\T\Big( \Vec{w}_i\Vec{h}_j^\T-a_{ij}\Big) + 2\lambda \Vec{w}_i
+%%\item we can use $r_{ij}=a_{ij}-\Vec{h}_j^\T \Vec{w}_i$ to write this as
+%%\[\frac{\partial f(\Vec{w}_i)}{\partial \Vec{w}_i} 
+%=   2\bigg(\lambda \Vec{w}_i-\sum_{j\in \Omega_i}r_{ij}\Vec{h}_j\bigg) \]
+%\mdcond{}
+%\item \coloremph{Gradient descent} method updates
+%\[\Vec{w}_i=\Vec{w}_i-\eta \frac{\partial f(\Vec{w}_i)}{\partial \Vec{w}_i}\]
+%\lgcond{
+%where parameter $\eta$ is our step-size
+%}
+%\end{itemize}
+%
+%\end{frame}
+%
+%\begin{frame}{Stochastic Gradient Descent (SGD)}
+%
+%\begin{itemize}
+%\item \coloremph{Stochastic gradient descent (SGD)} performs fine-grained updates based on a component of the overall gradient
+%\[\frac{\partial f(\Vec{w}_i)}{\partial \Vec{w}_i}  
+%=   2\bigg(\lambda \Vec{w}_i-\sum_{j\in \Omega_i}r_{ij}\Vec{h}_j\bigg) 
+%=   2\sum_{j\in \Omega_i}\lambda \Vec{w}_i/|\Omega_i|-r_{ij}\Vec{h}_j \]
+%where $\B R$ is the residual on entries $\Omega$.
+%
+%\lgcond{
+%SGD selects random $(i,j)\in\Omega$ and updates $\Vec{w}_i$ using $\Vec{h}_j$
+%\[\Vec{w}_i\leftarrow \Vec{w}_i-\eta(\lambda \Vec{w}_i/|\Omega_i| - r_{ij}\Vec{h}_j)\]
+%}
+%%\item SGD randomly selects pairs $(i,j)\in\Omega$ and updates $\Vec{w}_i$ (and $\Vec{h}_j$ in a dual fashion)
+%\item SGD then updates $r_{ij}=a_{ij}-\Vec{w}_i^\T \Vec{h}_j$, for a low overall cost:
+%
+%\lgcond{
+%Each update costs $O(k)$ operations if $k$ is the rank.
+%Stochastic properties make the method very effective in practice.
+%Techniques such as using momentum and extrapolation apply also in this context.
+%}
+%%\item $O(|\Omega|)$ yield the same total cost as CCD-based updates of $W$ and $H$
+%\end{itemize}
+%
+%\end{frame}
+%
+%
+%\begin{frame}{Coordinate Descent}
+%
+%Rather than whole rows $\Vec w_i$ solve for elements of $\Mat{\Mat{W}}$, recall
+%\[\argmin_{\Mat{W}\in \rmn mk} \sum_{(i,j)\in \Omega} \Big(a_{ij}-\sum_l w_{il}h_{jl}\Big)^2 + \lambda||\Mat{W}||_F\]
+%\begin{itemize}
+%\item \coloremph{Coordinate descent} finds the best replacement $\prm$ for $w_{it}$
+%\[\prm = \argmin_{\prm} \sum_{j\in \Omega_i} \Big(a_{ij}-\prm h_{jt}-\sum_{l\neq t} w_{il}h_{jl}\Big)^2 + \lambda \prm^2\]
+%
+%\mdcond{}
+%
+%\item The solution is given by
+%%\[\prm= \frac{\sum_{j\in \Omega_i} h_{jt}\Big(a_{ij}-\sum_{l\neq t} w_{il}h_{jl}\Big)}{
+%%\lambda +\sum_{j\in\Omega_i}h_{jt}^2}\]
+%\[\prm= \frac{\sum_{j\in \Omega_i} h_{jt}\Big(a_{ij}-\sum_{l\neq t} w_{il}h_{jl}\Big)}{
+%\lambda +\sum_{j\in\Omega_i}h_{jt}^2}
+%%
+%%can be computed as
+%%\[\prm= 
+%=\frac{\sum_{j\in \Omega_i} h_{jt}\Big(r_{ij}+ w_{it}h_{jt}\Big)}{
+%\lambda +\sum_{j\in\Omega_i}h_{jt}^2}\]
+%
+%\mdcond{
+%after which we can update $\Mat{R}$ via
+%\[r_{ij}\gets r_{ij}-(\prm-w_{it})h_{jt}\quad \forall j\in \Omega_i\]
+%}
+%
+%
+%\end{itemize}
+%
+%\end{frame}
+
+
+
+
+
+%\end{document}

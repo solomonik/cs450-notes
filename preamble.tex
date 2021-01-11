@@ -1,0 +1,305 @@
+\newcommand{\dee}{\partial}
+
+\newcommand{\bmat}[1]{\begin{bmatrix} \B{#1}_{11} & \B{#1}_{12} \\ \B{#1}_{21} & \B{#1}_{22}\end{bmatrix}}
+\newcommand{\blmat}[1]{\begin{bmatrix} \B{#1}_{11} &  \\ \B{#1}_{21} & \B{#1}_{22}\end{bmatrix}}
+\newcommand{\brmat}[1]{\begin{bmatrix} \B{#1}_{11} & \B{#1}_{12} \\ & \B{#1}_{22}\end{bmatrix}}
+\newcommand{\bomat}[1]{\begin{bmatrix} {#1}_{11} & \B{#1}_{12} \\ \B{#1}_{21} & \B{\uppercase{#1}}_{22}\end{bmatrix}}
+\newcommand{\blomat}[1]{\begin{bmatrix} {#1}_{11} & \\ \B{#1}_{21} & \B{\uppercase{#1}}_{22}\end{bmatrix}}
+\newcommand{\bromat}[1]{\begin{bmatrix} {#1}_{11} & \B{#1}_{12} \\  & \B{\uppercase{#1}}_{22}\end{bmatrix}}
+
+\DeclareMathOperator{\vcop}{vec}
+\newcommand{\vc}[1]{\vcop\left(#1\right)}
+\newcommand{\prm}{\mu}
+
+\newcommand{\fl}{fl}
+\newcommand{\asmcond}[1]{\smallskip{\it #1}\smallskip}
+\newcommand{\amdcond}[1]{\smallskip{\it #1}\smallskip}
+\newcommand{\algcond}[1]{\smallskip{\it #1}\smallskip}
+\newcommand{\atsmcond}[1]{{\it #1}}
+\newcommand{\atmdcond}[1]{{\it #1}}
+\newcommand{\atlgcond}[1]{{\it #1}}
+\newcommand{\afillnum}[1]{{\underline{ \ #1\ \ }}}
+
+\mode<presentation>
+{
+  \usetheme{Malmoe}
+}
+
+\usepackage[english]{babel}
+%
+%\usepackage[latin1]{inputenc}
+%
+%\usepackage{times}
+%\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+
+\usepackage{inconsolata}
+\usepackage{listings}
+\usepackage{bm}
+\usefonttheme[onlymath]{serif}
+\renewcommand\familydefault{\sfdefault}
+\usepackage[sfdefault]{ClearSans} %% option 'sfdefault' activates Clear Sans as the default text font
+%\usefonttheme{professionalfonts}
+
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{graphics}
+\usepackage{multicol}
+
+\definecolor{darkred}{rgb}{0.8,0.2,0.2}
+\newcommand{\coloremph}[1]{\textcolor{darkred}{\emph{#1}}}        % colored italics
+\newcommand{\reshape}[2]{o_{#1}(#2)}        % colored italics
+\newcommand{\ket}[1]{\lvert #1 \rangle}
+\newcommand{\bra}[1]{\langle #1 \vert}
+\newcommand{\transp}[2]{{#2}^{\langle  {#1} \rangle }}        % colored italics
+
+% Miscellaneous special math symbols
+
+% Big-oh notation - either Latex's calligraphic O or uppercase math italic O
+\newcommand{\BIGOH}{\mathcal{O}}                              % big oh
+%\newcommand{\BIGOH}{O}                                       % big oh
+\newcommand{\BIGTHETA}{\Theta}                                % big theta
+
+\newcommand{\sfrac}[2]{{#1}/{#2}}
+
+% Various versions of the fraction one-half
+% solidus 1/2 for superscripts:
+\newcommand{\SHALF}{1/2}                                      % one-half power
+% small 1/2 set case in displayed equations:
+\newcommand{\HALF}{\mbox{\small $\frac{1}{2}$}}               % small one-half
+\newcommand{\THRD}{\mbox{\scriptsize $\frac{1}{3}$}}          % small one-third
+\newcommand{\TWOTH}{\mbox{\scriptsize $\frac{2}{3}$}}         % small two-thirds
+
+% Machine epsilon - note that placement of subscript may need adjustment.
+%\newcommand{\emach}{\epsilon_{\textrm{\scriptsize mach}}} % machine prec.
+\newcommand{\emach}{\epsilon}
+
+\newcommand{\lsapprox}{\cong}                             % least squares approx
+
+% Real numbers - Prefer \mathbb{R} but it requires amsfonts.
+%                Latex's calligraphic R will do if amsfonts are unavailable.
+%                DO NOT use \Re, which gives old German fraktur R.
+\newcommand{\Real}{\mathbb{R}}                                 % real numbers
+\newcommand{\Cplx}{\mathbb{C}}                                 % complex numbers
+\newcommand{\Poly}{\mathbb{P}}                                 % polynomials
+\newcommand{\Float}{\mathbb{F}}                                % fl pt system
+% Bold math fonts for vectors and matrices
+\renewcommand{\Vec}[1]{\ensuremath{\bm{#1}}}                   % vector
+\newcommand{\Mat}[1]{\ensuremath{\bm{#1}}}                     % matrix
+\newcommand{\Op}[1]{#1}                              % operator
+\newcommand{\loc}[1]{x_{#1}}                              % operator
+
+% Loglike functions set in regular type
+\newcommand{\diag}{\mathrm{diag}}                             % diagonal matrix
+\newcommand{\cond}{\mathrm{cond}}                             % condition number
+\newcommand{\sign}{\mathrm{sign}}                             % sign function
+\newcommand{\Span}{\text{span}}                             % span of matrix
+%\newcommand{\trace}{\mathrm{trace}}                           % trace of matrix
+\DeclareMathOperator*{\trace}{trace}
+\newcommand{\tentrace}[3]{\trace_{#1,#2}(#3)}
+\renewcommand{\Re}{\mathrm{Re}}                               % real part
+\renewcommand{\Im}{\mathrm{Im}}                               % imaginary part
+
+% Fractions appearing in matrices - allows setting them case or solidus
+%\newcommand{\mf}[2]{{#1 \over #2}}        % matrix fraction - set case
+\newcommand{\mf}[2]{#1/#2}               % matrix fraction - set solidus
+
+
+% Keywords for algorithm statements
+
+\newcommand{\FOR}{\textbf{for}\ }
+\newcommand{\TO}{\textbf{to}\ }
+\newcommand{\IF}{\textbf{if}\ }
+\newcommand{\THEN}{\textbf{then}\ }
+\newcommand{\ELSE}{\textbf{else}\ }
+\newcommand{\WHILE}{\textbf{while}\ }
+\newcommand{\DO}{\textbf{do}\ }
+\newcommand{\BEGIN}{\textbf{begin}\ }
+\newcommand{\END}{\textbf{end}\ }
+\newcommand{\STOP}{\textbf{stop}\ }
+\newcommand{\AND}{\textbf{and}\ }
+\newcommand{\OR}{\textbf{or}\ }
+
+\newcommand{\comm}{\mathrm{comm}}
+\newcommand{\comp}{\mathrm{comp}}
+\newcommand{\idle}{\mathrm{idle}}
+\newcommand{\msg}{\mathrm{msg}}
+\newcommand{\len}{\mathrm{s}}
+\newcommand{\route}{\mathrm{route}}
+\newcommand{\mitem}{\medskip\item}
+\newcommand{\sitem}{\smallskip\item}
+\DeclareMathOperator*{\argmin}{argmin}
+
+%Gets rid of headline
+
+\setbeamertemplate{footline}{}
+
+\setbeamertemplate{headline}{}
+\beamertemplatenavigationsymbolsempty
+
+
+
+\definecolor{mygreen}{rgb}{0,0.2,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\definecolor{mypurple}{rgb}{0.38,0,0.32}
+\definecolor{myblue}{rgb}{0.2,0,0.5}
+\definecolor{darkgreen}{rgb}{0.2,0.6,0.2}
+\definecolor{Brown}{rgb}{0.39, 0.09, 0.0}
+\definecolor{Violet}{rgb}{0.38, 0.0, 0.63}
+\definecolor{myvlgray}{rgb}{0.9,0.9,1.0}
+\definecolor{mylgray}{rgb}{0.85,0.85,0.9}
+\definecolor{darkgreen}{rgb}{0,0.4,0}
+\definecolor{brown}{rgb}{.6,.1,.1}
+
+\newcommand{\bemph}[1]{{\color{blue} \emph{#1}}}
+
+\usepackage{mathtools}
+\newcommand{\defeq}{\coloneqq}
+
+\newcommand{\inti}[2]{[{#1},{#2}]}
+\newcommand{\BF}{\mathbf}
+\newcommand{\CF}{\mathcal}
+\newcommand{\B}[1]{\bm{#1}}
+\newcommand{\E}[1]{\bm{#1}}
+\newcommand{\dis}{\displaystyle}
+\newcommand{\lt}{\left}
+\newcommand{\rt}{\right}
+
+\newcommand{\cs}{H}
+
+\DeclareMathOperator*{\rank}{rank}
+\DeclareMathOperator*{\vecn}{vec}
+\DeclareMathOperator*{\vecs}{vech}
+
+\usepackage{eso-pic}
+\newcommand{\cornertext}[1]{
+  \AddToShipoutPictureFG*{
+    \AtPageUpperLeft{\put(0,-10){\makebox[\paperwidth][r]{#1}}}  
+   }%
+}
+\newcommand{\cornertexttwo}[2]{
+  \AddToShipoutPictureFG*{
+    \AtPageUpperLeft{\put(0,-10){\makebox[\paperwidth][r]{#1}}}  
+    \AtPageUpperLeft{\put(0,-20){\makebox[\paperwidth][r]{#2}}}  
+   }%
+}
+\newcommand{\linkdemo}[2]{{\footnotesize\href{https://relate.cs.illinois.edu/course/cs450-f18/f/demos/upload/#1/#2.html}{\color{Violet}{\it\textbf{Demo:} #2}\ }}}
+\newcommand{\linkinclass}[2]{{\footnotesize\href{https://relate.cs.illinois.edu/course/cs450-f18/flow/#1/start/}{\color{darkgreen}{\it\textbf{Activity:} #2}\ }}}
+\newcommand{\urcornerlinkinclass}[2]{\cornertext{\linkinclass{#1}{#2}}}
+\newcommand{\dblurcornerlinkinclass}[4]{\cornertexttwo{\linkinclass{#1}{#2}}{\linkinclass{#3}{#4}}}
+\newcommand{\urcornerlinkdemo}[2]{\cornertext{\linkdemo{#1}{#2}}}
+\newcommand{\dblurcornerlinkdemo}[4]{\cornertexttwo{\linkdemo{#1}{#2}}{\linkdemo{#3}{#4}}}
+\newcommand{\urcornerlinkdemoinclass}[4]{\cornertexttwo{\linkdemo{#1}{#2}}{\linkinclass{#3}{#4}}}
+
+
+
+% CS 554 specific:
+
+\newcommand{\tsync}{\alpha}
+\newcommand{\tword}{\beta}
+\newcommand{\tflop}{\gamma}
+
+\newcommand{\bw}{w}
+
+\newcommand{\tpl}[2]{{\bm{#1}}}
+\newcommand{\vtpl}[3]{{\bm{#1}}_#3}
+\newcommand{\perm}[2]{\lt[#1\rt]_{#2}}
+\newcommand{\costyle}{\ttfamily\bfseries}
+\newcommand{\cotext}[1]{{\costyle{#1}}}
+\newcommand{\kwstyle}{\costyle\textcolor{mypurple}}
+\newcommand{\kwtext}[1]{{\kwstyle{#1}}}
+\newcommand{\emstyle}{\costyle\textcolor{myblue}}
+\newcommand{\emtext}[1]{{\emstyle{#1}}}
+\newcommand{\const}{}
+\newcommand{\work}{Q}
+\newcommand{\depth}{D}
+\newcommand{\flops}{F}
+\newcommand{\words}{W}
+\newcommand{\syncs}{S}
+\newcommand{\mem}{M}
+\newcommand{\eff}{E}
+\newcommand{\isofun}[1]{\tilde{\work}(p)}
+\newcommand{\isomem}[1]{\tilde{\mem}(p)}
+\newcommand{\pstrong}{p_s}
+\newcommand{\pweak}{p_w}
+\newcommand{\ALL}{\star }
+\newcommand{\rmn}[2]{\mathbb{R}^{#1\times #2}}
+\newcommand{\rn}[1]{\mathbb{R}^{#1}}
+\newcommand{\err}{\varepsilon}
+\newcommand{\mat}[1]{\begin{bmatrix} #1 \end{bmatrix}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\h}[2]{\mc{H}_{#1}(#2)}
+\newcommand{\T}{T}%{\mathsf{T}}
+\newcommand{\dn}[2]{\mc{M}_{#1}^{\uparrow}(#2)}
+%\usepackage[colorlinks=false,urlbordercolor={1.0 1.0 1.0}]{hyperref}
+%
+%\lstset{ %
+%  postbreak=false,
+%%  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+%  basicstyle=\costyle,        % the size of the fonts that are used for the code
+%%  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+%%  breaklines=false,                 % sets automatic line breaking
+%  captionpos=n,                    % sets the caption-position to bottom
+%  commentstyle=\color{mygreen},    % comment style
+%  deletekeywords={...},            % if you want to delete keywords from the given language
+%  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+%  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+%  frame=none,                    % adds a frame around the code
+%  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+%  keywordstyle=\color{mypurple},       % keyword style
+%  language=C++,                 % the language of the code
+%  otherkeywords={*,...},            % if you want to add more keywords to the set
+%  numbers=none,                    % where to put the line-numbers; possible values are (none, left, right)
+%  numbersep=5pt,                   % how far the line-numbers are from the code
+%  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+%  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+%  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+%  showstringspaces=false,          % underline spaces within strings only
+%  showtabs=false,                  % show tabs within strings adding particular underscores
+%  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+%  stringstyle=\color{mymauve},     % string literal style
+%  tabsize=2,                     % sets default tabsize to 2 spaces
+%  title=\lstname,                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+%  keywordstyle=\emstyle
+%}
+
+\lstset{ %
+  postbreak=false,
+%  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize\costyle,        % the size of the fonts that are used for the code
+%  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+%  breaklines=false,                 % sets automatic line breaking
+  captionpos=n,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={privatei,shared},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=none,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\footnotesize\color{mypurple},       % keyword style
+  language=C++,                 % the language of the code
+  otherkeywords={*,pragma},            % if you want to add more keywords to the set
+  numbers=none,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\footnotesize\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\footnotesize\color{mymauve},     % string literal style
+  tabsize=2,                     % sets default tabsize to 2 spaces
+  title=\lstname,                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+  emph={MPI_Send,MPI_Recv,MPI_Comm,MPI_Comm_rank,MPI_Send,MPI_Comm_split,MPI_Init,MPI_Finalize,MPI_Status,MPI_COMM_WORLD,MPI_Datatype,MPI_Comm_size,MPI_FLOAT,mpi.h,omp,parallel,shared,private,default,reduction},
+  emphstyle=\footnotesize\emstyle
+}
+
+\title{CS 450: Numerical Anlaysis\footnote{{\it These slides have been drafted by Edgar Solomonik as lecture templates and supplementary material for the book ``Scientific Computing: An Introductory Survey'' by Michael T. Heath (\href{http://heath.cs.illinois.edu/scicomp/notes/index.html}{{\color{blue} slides}}).}}}
+\author{}
+\institute{University of Illinois at Urbana-Champaign}
+
+

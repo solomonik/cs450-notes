@@ -1,0 +1,388 @@
+%%\documentclass[handout]{beamer}
+%\documentclass[aspectratio=169,13pt]{beamer}
+
+%\input{./preamble}
+
+\subtitle{Fast Fourier Transform}
+
+\date{}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\section{Model Problem}
+
+\begin{frame}{Sparse Linear Systems and Time-independent PDEs}
+
+\begin{itemize}
+\item The Poisson equation serves as a model problem for numerical methods:
+
+\lgcond{
+\begin{itemize}
+\sitem the 2D Poisson problem and resulting Kronecker product linear system are a common benchmark,
+\sitem this system has the form $\B T \otimes \B I + \B I \otimes \B T$ where $\B T$ is tridiagonal.
+\end{itemize}
+}
+
+\item Dense, sparse direct, iterative, FFT, and Multigrid methods provide increasingly good complexity for the problem: 
+
+\lgcond{
+\begin{itemize}
+\sitem dense linear system solve costs $O(n^3)$ naively,
+\sitem nested dissection with Cholesky has $O(n^{3/2})$ complexity and $O(n\log n)$ memory
+\sitem Conjugate-Gradient gives $O(n^{3/2})$ complexity with $O(n)$ memory
+\sitem FFT achieves $O(n \log n)$ cost and multigrid achieves $O(n)$.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+\section{Multigrid}
+
+\begin{frame}{Multigrid}
+
+\begin{itemize}
+\item Multigrid employs a hierarchy of grids to accelerate iterative methods:
+
+\lgcond{
+\begin{itemize}
+\item the residual equation $\B A \B{\hat{x}} = \B r$ on each fine grid, is approximately solved on the next coarser grid,
+\mitem the equation is \coloremph{restricted} by projection matrix $\B P$, so that $\B P \B A \B P^T \B P \B{\hat{x}} = \B P \B r$
+\mitem the interpolation operator (often given by $\B P^T$) is used to obtain an approximate $\B{\hat{x}}$ based on the coarse grid approximate solution,
+\mitem at each level we perform some smoothing operations (e.g. Jacobi or Conjugate Gradient) before restriction and after interpolation, 
+\mitem at the coarsest level we typically solve directly.
+\end{itemize}
+}
+\mdcond{}
+
+\item The multigrid method works by resolving high-frequency error components on finer-grids and low-frequency error components on coarser grids:
+
+\mdcond{
+\begin{itemize}
+\item smoothers are usually effective at reducing local error, but slow at resolving global (low-frequency) components of the error,
+\mitem on coarser grids, the low frequency error may be resolved more quickly.
+\end{itemize}
+}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Multigrid}
+
+\begin{itemize}
+\item Consider the Galerkin approximation with linear finite elements to the Poisson equation $u''=f(t)$ with boundary conditions $u(a)=u(b)=0$:
+\[%\forall i \in \{1,n\} , \quad 
+\phi_i^{(h)}(t) = \begin{cases} (t-t_{i-1})/h &: t \in [t_{i-1},t_i] \\ (t_{i+1}-t)/h &: t\in [t_{i},t_{i+1}] \\ 0 &: \text{otherwise} \end{cases}\]
+where $t_0=t_1=a$ and $t_{n+1}=t_n=b$.
+\tlgcond{
+The weak form with grid spacing of $h$ is
+\begin{align*}
+\int_a^b f(t) \phi^{(h)}_i(t) dt &=  - \sum_{j=1}^n x_j\int_a^b {\phi_j^{(h)}}'(t){\phi_i^{(h)}}'(t) dt.
+\end{align*}
+in multigrid, we define a coarse grid basis of $(n-1)/2$ functions, which are hat functions of twice the width,
+\begin{align*}
+\phi_i^{(2h)}(t) = \frac 12\phi_{2i-2}^{(h)}(t) + \phi_{2i-1}^{(h)}(t) + \frac 12\phi_{2i}^{(h)}(t) = \begin{cases} (t-t_{i-2})/2h &: t \in [t_{i-2},t_i] \\ (t_{i+2}-t)/2h &: t\in [t_{i},t_{i+2}] \\ 0 &: \text{otherwise} \end{cases}
+\end{align*}
+}
+\lgcond{}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Coarse Grid Matrix}
+
+\begin{itemize}
+\item Multigrid restricts the residual equation on the fine grid $\B A^{(h)}\B x = \B r^{(h)}$ to the coarse grid:
+\tlgcond{
+Let $\B{\phi}^{(2h)}=\begin{bmatrix} \phi_1^{(2h)} & \cdots &  \phi_{(n-1)/2}^{(2h)} \end{bmatrix}$ and
+$\B{\phi}^{(h)}=\begin{bmatrix} \phi_1^{(h)} & \cdots &  \phi_{n}^{(h)} \end{bmatrix}$ and define \coloremph{restriction matrix} $\B P$ so that $\B{\phi}^{(2h)}=\B P \B{\phi}^{(h)}$, i.e., 
+\[\B P = \frac 12\begin{bmatrix} 1 & 2 & 1 & & \\ & 1 & 2 & 1 & \\ & & \ddots & \ddots & \ddots \end{bmatrix} = \begin{bmatrix} {\B{p}^{(1)}} \\ {\B{p}^{(2)}} \\ \vdots \end{bmatrix}.\]
+The coarse grid stiffness matrix is given by
+\begin{align*}
+a^{(2h)}_{ij} &= - \int_a^b {\phi_j^{(2h)}}'(t){\phi_i^{(2h)}}'(t) dt \\
+&= - {\B{p}^{(i)}}\underbrace{\bigg(\int_a^b  {\B \phi^{(h)}}'(t) {{\B{\phi}^{(h)}}'}{}^T(t) dt\bigg)}_{-\B A^{(h)}}{\B p^{(j)}}^T, \\
+\B A^{(2h)} &= \B P \B A^{(h)} \B P^T.
+% &=  - \int_a^b ({\phi_{2i-2}^{(h)}}'(t) + 2{\phi_{2i-1}^{(h)}}'(t) + {\phi_{2i}^{(h)}(t)}'(t))
+% ({\phi_{2j-2}^{(h)}}'(t) + 2{\phi_{2j-1}^{(h)}}'(t) + {\phi_{2j}^{(h)}(t)}'(t))dt
+\end{align*}
+
+%\begin{align*}
+%\int_a^b f(t) \phi^{(h)}_i(t) dt &=  - \sum_i x_i\int_a^b {\phi_j^{(h)}}'(t){\phi_i^{(h)}}'(t) dt.
+%\end{align*}
+%
+%To do so, we need to obtain a suitable basis transformation from $\{\phi^{(h)}_i\}$ to $\{\phi^{(2h)}_i\}$.
+%We would like a correct answer at each $t$ and can obtain a system of equations by integrating w.r.t. test functions $\phi^{(h)}_j(h)$,
+%\begin{align*}
+%\sum_{i=1}^{n/2} x^{(2h)}_i \int_a^b\phi_i^{(2h)}(t)  \phi_j^{(h)}(t)dt = \sum_{i=1}^n x^{(h)}_i\int_a^b \phi_i^{(h)}(t) \phi_j^{(h)}(t)dt
+%\end{align*}
+}
+\lgcond{}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Restricting the Residual Equation}
+
+\begin{itemize}
+\item Given the fine-grid residual $\B r^{(h)}$, we seek to use the coarse grid to approximate $\B x^{(h)}$ so that $\B A \B x^{(h)} \approx \B r^{(h)}$
+
+\lgcond{
+\begin{itemize}
+\item
+%Let $\B t = \begin{bmatrix} a+h & a+2h & \cdots & b-h \end{bmatrix}^T$.
+Given a function in the coarse grid basis, $u^{(2h)} = {\B x^{(2h)}}^T\B{\phi}^{(2h)}$, we can express it in the fine-grid basis via
+\begin{align*}
+u^{(2h)} &= {\B x^{(2h)}}^T \underbrace{\B P \B{\phi}^{(h)}}_{\B{\phi}^{(2h)}} = \underbrace{{\B x^{(2h)}}^T \B P}_{{\B x^{(h)}}^T} \B{\phi}^{(h)}.
+\end{align*}
+\item
+Consequently, the solution to the restricted residual equation $\B A^{(2h)}\B x^{(2h)} = \B r^{(2h)}$ will lead to an approximate residual equation solution on the fine grid 
+with $\B x^{(h)} =\B P^T\B x^{(2h)}$.
+\mitem
+Noting this, we derive the form of the coarse grid residual, %form the coarse grid problem via
+\begin{align*}
+\B r^{(2h)} &= \B A^{(2h)}\B x^{(2h)} \\
+&= \B P\B A^{(h)}\B P^T \B x^{(2h)}  = \B P\B A^{(h)}\B x^{(h)}  \\
+&= \B P\B r^{(h)}. 
+\end{align*}
+\end{itemize}
+%\[w_i=u^{(2h)}(t_i)={\B x^{(2h)}}^T\B{\phi}^{(2h)}(t_i)={\B x^{(2h)}}^T\B P \underbrace{\B{\phi}^{(h)}(t_i)}_{\B e_i}\]
+% so $\B w = \B P^T{\B x^{(2h)}}$.
+%Note that for a function in the fine grid basis, $u^{(h)} = {\B x^{(h)}}^T\B{\phi}^{(h)}$, we have $u^{(2h)}(t_i) = x^{(h)}_i$.
+%Consequently, we can express the coarse grid function in the fine grid basis via
+%\begin{align*}
+%u^{(h)}(t) &= \underbrace{{\B x^{(2h)}}^T \B P}_{\B x^{(h)}^T} \B{\phi}^{(h)}
+%\end{align*}
+}
+\lgcond{}
+\end{itemize}
+
+\end{frame}
+
+%\begin{frame}{Multigrid Restriction}
+%
+%\begin{itemize}
+%\item Multigrid restricts the residual equation on the fine grid to the coarse grid:
+%\tlgcond{
+%To do so, we need to obtain a suitable basis transformation from $\{\phi^{(h)}_i\}$ to $\{\phi^{(2h)}_i\}$,
+%\begin{align*}
+%\B V(\{\phi_{2i-1}^{(2h)}\}_{i=1}^{(n-1)/2},\{t_i\}_{i=1}^n) \B x^{(2h)} \cong  \B V(\{\phi_i\}_{i=1}^n,\{t_i\}_{i=1}^n)  \B x^{(h)}
+%\end{align*}
+%For linear finite elements $\B V(\{\phi_i^{(h)}\}_{i=1}^n,\{t_i\}_{i=1}^n)= \B I$ so we obtain,
+%\begin{align*}
+% \B V(\{\phi_{2i-1}^{(2h)}\}_{i=1}^{(n-1)/2},\{t_i\}_{i=1}^n)\B x^{(2h)} =  \B x^{(h)}.
+%\end{align*}
+%Multigrid requires values of the residual $\{r(t_{2i-1}\}_{i=1}^{(n-1)/2}$ on the coarse grid, whose coefficients $\B x^{(2h)}$ are then given by
+%\begin{align*}
+%\B r^{(2h)} = \underbrace{\B V(\{\phi_{i}^{(h)}\}_{i=1}^{n},\{t_{2i-1}\}_{i=1}^{(n-1)/2})}_{\B I}\B x^{(h)} &=  \B V(\{\phi_{2i-1}^{(2h)}\}_{i=1}^{(n-1)/2},\{t_i\}_{i=1}^n)\B x^{(2h)}.
+%\end{align*}
+%}
+%\end{itemize}
+%\end{frame}
+
+\section{Fast Fourier Transform}
+
+\begin{frame}{Discrete Fourier Transform}
+
+\begin{itemize}
+\item The solutions to hyperbolic PDEs like Poisson are wave-like and take on simple representations in the frequency basis, both for continuous and discretized equations. We define the \coloremph{discrete Fourier transform} using
+$$
+\omega_{(n)} = \cos(2\pi/n) - i\sin(2\pi/n) = e^{-2\pi i/n}.
+$$
+\lgcond{
+The DFT matrix $\B F\in\mathbb{R}^{n\times n}$ is given by
+$f_{ij}=\omega_{(n)}^{ij}$,
+$$
+\B{F} =
+\left[ \begin{matrix}
+1 & 1 & 1 & 1 \cr
+1 & \omega_{(4)}^{1} & \omega_{(4)}^{2} & \omega_{(4)}^{3} \cr
+1 & \omega_{(4)}^{2} & \omega_{(4)}^{4} & \omega_{(4)}^{6} \cr
+1 & \omega_{(4)}^{3} & \omega_{(4)}^{6} & \omega_{(4)}^{9} \end{matrix}
+\right]$$
+
+\begin{itemize}
+\item it is complex and symmetric (not Hermitian),
+\item it is unitary modulo scaling $\B F^{*} = n\B F^{-1}$.
+\end{itemize}
+The discrete Fourier transform of vector $\B v$ is $\B F \B v$.
+}
+\lgcond{}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Fast Fourier Transform (FFT)}
+
+\begin{itemize}
+\item Consider $\B b=\B{F}\B a$, we have
+\[\forall j\in[0,n-1] \quad b_j=\sum_{k=0}^{n-1}\omega_{(n)}^{jk}a_k,\]
+the FFT computes this recursively via 2 FFTs of dimension $n/2$, using $\omega_{(n/2)}=\omega_{(n)}^2$,
+\lgcond{
+\begin{align*}
+%\forall j\in[0,n-1] \quad 
+b_j&=\sum_{k=0}^{n/2-1}\omega_{(n)}^{j(2k)}a_{2k}+\sum_{k=0}^{n/2-1}\omega_{(n)}^{j(2k+1)}a_{2k+1} \\
+&=\sum_{k=0}^{n/2-1}\omega_{(n/2)}^{jk}a_{2k}+\omega_{(n)}^j\sum_{k=0}^{n/2-1}\omega_{(n/2)}^{jk}a_{2k+1}
+\end{align*}
+}
+\lgcond{}
+%, so
+%\[\forall j\in[1,n/2] \quad b(2j)=\sum_{k=0}^{n/2-1}\omega_{(n/2)}^{jk}a_k\]
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Fast Fourier Transform Derivation}
+
+\begin{itemize}
+\item The FFT leverages similarity between the first and second half of the output,
+\begin{align*}
+b_j&=\underbrace{\sum_{k=0}^{n/2-1}\omega_{(n/2)}^{jk}a_{2k}}_{u_j}+\omega_{(n)}^j\underbrace{\sum_{k=0}^{n/2-1}\omega_{(n/2)}^{jk}a_{2k+1}}_{v_j}
+\end{align*}
+corresponds closely to the entry shifted by $n/2$,
+\begin{align*}
+ b_{j+n/2}&=\sum_{k=0}^{n/2-1}\omega_{(n/2)}^{(j+n/2)k}a_{2k}+\omega_{(n)}^{j+n/2}\sum_{k=0}^{n/2-1}\omega_{(n/2)}^{(j+n/2)k}a_{2k+1} 
+\end{align*}
+\lgcond{
+Now $\omega_{(n/2)}^{(j+n/2)k}=\omega_{(n/2)}^{jk}$ since $(\omega_{(n/2)}^{n/2})^k=1^k=1$ and using $\omega_{(n)}^{n/2}=-1$,
+%$\forall j\in[0,n/2-1]$
+\begin{align*}
+b_{j+n/2}
+&=\underbrace{\sum_{k=0}^{n/2-1}\omega_{(n/2)}^{jk}a_{2k}}_{u_j}-\omega_{(n)}^{j}\underbrace{\sum_{k=0}^{n/2-1}\omega_{(n/2)}^{jk}a_{2k+1}}_{v_j} 
+\end{align*}
+}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{FFT Algorithm Summary}
+
+%Each of these two summation can be done recursively with an FFT %of dimension $n/2$
+% which can then be combined to compute the upper and lower halves of $b$
+\begin{itemize}
+\item Let vectors $\B u$ and $\B v$ be two recursive FFTs, $\forall j\in[0,n/2-1]$
+\begin{align*}
+u_j&=\sum_{k=0}^{n/2-1}\omega_{(n/2)}^{jk}a_{2k}, \quad
+v_j=\sum_{k=0}^{n/2-1}\omega_{(n/2)}^{jk}a_{2k+1}
+\end{align*}
+\lgcond{
+\begin{itemize}
+%\item We can make these two recursive calls simultaneously and without any work
+\item Given $\B u$ and $\B v$ scale using "twiddle factors" $z_j=\omega_{(n)}^j\cdot v_j$
+\item Then it suffices to combine the vectors as follows
+\(\B b=\begin{bmatrix} \B u+\B z \\ \B u-\B z\end{bmatrix}\)
+%\item This recombination is an FFT of dimension 2
+%\[\B b=\begin{bmatrix} \B{b}_1 \\ \B{b}_2 \end{bmatrix} = \vc{\begin{bmatrix} \B b_1 & \B b_2\end{bmatrix}} = 
+%\vcop\bigg(\begin{bmatrix} \B u & \B z \end{bmatrix} \underbrace{\begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}}_{\B{F_4}[0:2,0:2]}\bigg) %=
+%%\vc{\begin{bmatrix} \B u & \B z \end{bmatrix} \B{F_2}}
+%\]
+%\vspace{-.2in}
+%\item Radix-$r$ algorithm for any $\B{A}\in\mathbb{R}^{n/r\times r}$ 
+%\[
+%%\vc{\B{B}}=
+%\B{F}_{n}\vc{\B{A}} = \vc{\big([\B{F}_{n}[0:r,0:r] \odot (\B{F}_r \B{A})]\B{F}_{n/r})^T}\]
+%%\ \text{ if and only if } \ \B{B} = \B{F}_{n/r} \B{A} \B{F}_r\]
+\end{itemize}
+}
+\item The FFT has $O(n \log n)$ cost complexity:
+
+\lgcond{
+There are two recursive calls of dimension $n/2$ and $O(n)$ work for application to twiddle factors and final summation, thus
+$$T(n)=2T(n)+O(n)=O(n\log n).$$
+} 
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Applications of the FFT}
+\begin{itemize}
+\item We can rapidly multiply degree $n$ polynomials by considering their values $\omega_{(2n-1)}^i$ for $i\in\{0,\ldots,2n-1\}$
+\lgcond{
+\[p_c(\omega_{(2n-1)}^i)=p_a(\omega_{(2n-1)}^i)p_b(\omega_{(2n-1)}^i)\]
+\begin{itemize}
+\item The product of coefficients of $p_a,p_b$ with Vandermonde matrix $v_{ij}=(\omega_{(2n-1)}^{i})^{j}$, which is the DFT matrix, gives values of polynomials at $2n-1$ nodes.
+\mitem Interpolation to compute coefficients of $p_c$ from the products of values of $p_a$ and $p_b$ at those nodes is multiplication by the inverted DFT matrix and is exact since $p_c$ is degree $2n-2$.
+\end{itemize}
+}
+
+\item More generally the DFT can be used to solve any Toeplitz linear system (convolution):
+\lgcond{
+\begin{itemize}
+\item
+A standard convolution has the form,
+\(\forall k\in [0,n-1] \quad c_k = \sum_{j=0}^k a_jb_{k-j}.\)
+\mitem Convolution is equivalent to multiplications of polynomials with degree $n/2-1$ and coefficients  $\Vec a$ and $\Vec b$, where
+%\[p_a(x) = \sum_{k=0}^{n/2-1} a_kx^k,\quad
+%p_b(x) = \sum_{k=0}^{n/2-1} a_kx^k\]
+the convolution computes the coefficients $\Vec c$ of the product of the two polynomials.
+%\[p_c(x) = p_a(x)p_b(x) = \sum_{k=0}^{n-1} c_kx^k\]
+\end{itemize}
+}
+\end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}{Convolution via DFT}
+
+\begin{itemize}
+\item The Fourier transform method for computing a convolution is given by
+\begin{align*}
+c_k &= %\sum_s D^{-1}_{ks} \Big(\sum_j D_{sj} a_j\Big)\Big(\sum_t D_{st} b_t\Big) 
+  \frac 1n \sum_s \omega^{-ks}_{(n)} \Big(\sum_j \omega^{sj}_{(n)} a_j\Big)\Big(\sum_t \omega_{(n)}^{st} b_t\Big)
+\end{align*}
+\lgcond{
+\begin{itemize}
+\item Rearrange the order of the summations to see what happens to every product of $a$ and $b$
+\begin{align*}
+c_k &%= \frac 1n \sum_s\sum_j\sum_t \omega^{-ks}_{(n)} \omega_{(n)}^{sj}\omega^{st}_{(n)} a_j b_t
+ = \frac 1n \sum_s\sum_j\sum_t \omega^{(j+t-k)s}_{(n)} a_j b_t 
+\end{align*}
+\item For any $u=j+t-k\neq 0$, we observe $\sum_s(\omega_{(n)}^u)^s=0$ %, as for $\Mat F\Mat F^{-1}$
+\mitem When $j+t-k=0$ the products $\omega^{(s+t-j)k}_{(n)}=1$, so there are $n$ nonzero terms $a_jb_{k-j}$ in the summation
+\end{itemize}
+}
+\lgcond{}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Solving Numerical PDEs with the FFT}
+
+
+\urcornerlinkdemo{12-fft}{Fast Fourier Transform}
+
+\begin{itemize}
+\item 1D finite-difference schemes on a regular grid correspond to convolutions:
+
+\mdcond{
+1D model problem is simply convolution with vector $[1, -2, 1]$.
+}
+
+\item For the 1D Poisson model problem, the eigenvectors of $\B T$ corresponds to the imaginary part of a minor of a $2(n+1)$-dimensional DFT matrix:
+
+\mdcond{
+\begin{itemize}
+\item
+In particular, $\B T =\B X \B D \B X^{-1}$ where $x_{ij}$ is the imaginary part of $f_{i+1,j+1}$ with $\B X\in \mathbb{R}^{n\times n}$ and $\B F \in \mathbb{R}^{2(n+1)\times 2(n+1)}$.
+\mitem
+Consequently, $\B T$ can be diagonalized and the overall system solved by FFT with $O(n\log n)$ cost.
+\end{itemize}
+}
+
+\item Multidimensional Poisson can be handled with multidimensional FFT:
+
+\mdcond{
+For example 2D FFT (1D FFT of each row then 1D FFT of each column) suffices to solve the 2D Poisson problem.
+}
+
+\end{itemize}
+
+\end{frame}
+
+%\end{document}
+
