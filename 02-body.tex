@@ -723,7 +723,7 @@ LU without pivoting and Cholesky preserve banded structure and require only $O(n
 Cost is $O(n^2k)$ for solving the $k$ independent linear systems
 }
 
-\item {\bf Supposed  we have computed $\B A = \B L \B U$ and now want to solve a perturbed system $(\B A - \B u \B v^T)\B x = \B b$:}
+\item {\bf Suppose we have computed $\B A = \B L \B U$ and now want to solve a perturbed system $(\B A - \B u \B v^T)\B x = \B b$:}
 
 Can use the \coloremph{Sherman-Morrison-Woodbury} formula
 \[(\B A - \B u \B v^T)^{-1} = \B A^{-1} + \frac{\B{A}^{-1}\B u\B v^T\B A^{-1}}{1- \B v^T \B{A}^{-1}\B u}\] 
